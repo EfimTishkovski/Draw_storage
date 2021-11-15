@@ -178,8 +178,8 @@ background-color: rgb(0, 170, 255);</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>690</y>
-      <width>221</width>
+      <y>710</y>
+      <width>391</width>
       <height>41</height>
      </rect>
     </property>
@@ -192,13 +192,13 @@ background-color: rgb(0, 170, 255);</string>
      <string notr="true">background-color: rgba(0,0,0,0);</string>
     </property>
     <property name="text">
-     <string>Режим просмотра</string>
+     <string>Вход не выполнен: режим просмотра</string>
     </property>
    </widget>
    <widget class="QPushButton" name="delete_button">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>190</x>
       <y>560</y>
       <width>200</width>
       <height>40</height>
@@ -225,7 +225,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
    <widget class="QPushButton" name="append_button">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>410</x>
       <y>560</y>
       <width>200</width>
       <height>40</height>
@@ -251,7 +251,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
    <widget class="QPushButton" name="search_button">
     <property name="geometry">
      <rect>
-      <x>249</x>
+      <x>20</x>
       <y>560</y>
       <width>151</width>
       <height>40</height>
@@ -274,7 +274,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
      <string>Поиск</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_2">
+   <widget class="QLineEdit" name="username_lineEdit">
     <property name="geometry">
      <rect>
       <x>880</x>
@@ -288,7 +288,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
 font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_3">
+   <widget class="QLineEdit" name="password_lineEdit">
     <property name="geometry">
      <rect>
       <x>880</x>
@@ -301,8 +301,17 @@ font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
      <string notr="true">background-color: rgb(255, 255, 255);
 font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
+    <property name="inputMask">
+     <string/>
+    </property>
+    <property name="text">
+     <string notr="true"/>
+    </property>
+    <property name="frame">
+     <bool>true</bool>
+    </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="username_label">
     <property name="geometry">
      <rect>
       <x>880</x>
@@ -319,12 +328,12 @@ background-color: rgba(0, 0, 0,0);</string>
      <string>Имя пользователя</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="password_label">
     <property name="geometry">
      <rect>
       <x>880</x>
       <y>410</y>
-      <width>141</width>
+      <width>61</width>
       <height>31</height>
      </rect>
     </property>
@@ -336,7 +345,7 @@ background-color: rgba(0, 0, 0,0);</string>
      <string>Пароль</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="enter_label">
     <property name="geometry">
      <rect>
       <x>950</x>
@@ -348,7 +357,7 @@ background-color: rgba(0, 0, 0,0);</string>
     <property name="font">
      <font>
       <family>MS Shell Dlg 2</family>
-      <pointsize>14</pointsize>
+      <pointsize>16</pointsize>
       <weight>9</weight>
       <italic>false</italic>
       <bold>false</bold>
@@ -356,11 +365,97 @@ background-color: rgba(0, 0, 0,0);</string>
     </property>
     <property name="styleSheet">
      <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;
-font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+font: 75 16pt &quot;MS Shell Dlg 2&quot;;
 background-color: rgba(0, 0, 0,0);</string>
     </property>
     <property name="text">
      <string>Вход</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="input_button">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>510</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+background-color: rgb(0, 255, 0);
+border-color: rgb(0, 85, 255);
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Войти</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="show_password_button">
+    <property name="geometry">
+     <rect>
+      <x>1038</x>
+      <y>410</y>
+      <width>40</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>показать_пароль.png</normaloff>показать_пароль.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>32</width>
+      <height>32</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="exit_account_button">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>580</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-color: rgb(0, 85, 255);
+font: 12pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(255, 170, 0);
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Выход из учётной записи</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="change_signal_label_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>670</y>
+      <width>391</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgba(0,0,0,0);</string>
+    </property>
+    <property name="text">
+     <string>Пользователь:</string>
     </property>
    </widget>
   </widget>
