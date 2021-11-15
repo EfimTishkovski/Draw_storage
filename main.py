@@ -29,6 +29,15 @@ def message_window(messege, title='Внимание!'):
     message_box.setWindowIcon(QIcon('закладка-лента.png'))
     message_box.exec_()
 
+# Глобальная функция вызова окна ошибки
+def error_window(messege, title='Ошибка!'):
+    message_box = QMessageBox()
+    message_box.setText(messege)
+    message_box.setWindowTitle(title)
+    message_box.setIcon(QMessageBox.Warning)
+    message_box.setWindowIcon(QIcon('ошибка.png'))
+    message_box.exec_()
+
 
 class Main_window(QMainWindow):
 
@@ -151,9 +160,9 @@ class Main_window(QMainWindow):
     def change_button_pessed(self):
         self.change_flag = not self.change_flag   # Инверсия логического значения флага при нажатии
         if self.change_flag:
-            self.change_signal_label.setText('Режим редактирования')
+            self.change_signal_label.setText('Вход выполнен: режим редактирования ативен')
         else:
-            self.change_signal_label.setText('Режим просмотра')
+            self.change_signal_label.setText('Вход не выпонен: режим просмотра')
 
     # Функция принятия номера выделонной строки (решение странное)
     def select_row_number(self, row):
@@ -213,6 +222,31 @@ class Main_window(QMainWindow):
     def search_window(self):
         self.search_win.show()
 
+    # Функция входа в аккаунт
+    def enter(self):
+        fild_flag = False # Флаг для обработки условия не пустых полей
+        # Можно и без него, но нехотелось городить множественные вложенные условия
+        # Проверка на пустые поля ввода
+        user_name = self.username_lineEdit.text()
+        password = self.password_lineEdit.text()
+        if user_name !='' and password != '':
+            fild_flag = True
+        # Проверка на уже выполненый вход
+        if self.change_flag is False:
+            enter_flag = check_enter(user_name, password)
+            # Действия после проверки имени и пароля
+            if enter_flag:
+                self.change_flag = True
+                self.change_signal_label.setText('Вход выполнен: режим редактирования ативен')
+                self.change_signal_label_2.setText('Пользователь: ' + user_name)
+            elif enter_flag is False:
+                message_window('Неверное имя пользователя или пароль', ' Вход не выполнен')
+            elif enter_flag is None:
+                error_window('Ошибка входа')
+
+
+
+
     # Основная функция приложения
     def __init__(self):
         super(Main_window, self).__init__()
@@ -224,6 +258,10 @@ class Main_window(QMainWindow):
         self.search_win = Search_form()    # Создание экземпляра класса Search_form
         self.search_win.setWindowIcon(QIcon('фонарик.png'))  # Установка значка для окна поиска
 
+        # Инциализация (состояние некоторых кнопок на момент запуска приложения)
+        self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
+        self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
+
         # Програмная вставка иконок в кнопки (эксперимент)
         self.delete_button.setIcon(QIcon('удалить-64.png'))
         self.delete_button.setIconSize(QSize(35, 35))
@@ -233,7 +271,7 @@ class Main_window(QMainWindow):
         self.search_button.setIconSize(QSize(35, 35))
 
         # Переменные
-        self.change_flag = False             # Переменная состояния флага редактирования
+        self.change_flag = False             # Переменная состояния флага редактирования по умолчанию режим просмотра
         self.table_names = []                # Массив для имён таблиц
         self.selected_row = -1               # Переменная номер выделенной строки
 
@@ -243,12 +281,13 @@ class Main_window(QMainWindow):
         self.connect_base_button.clicked.connect(self.openfile)       # Обработчик кнопки "Подключить базу"
         self.table_list.activated[str].connect(self.info_table_show)  # Обработчик смены таблицы в выпадающем списке
         self.Main_Table.itemClicked.connect(self.show_drawing)        # Обработчик клика на ячейку, показывает чертёж
-        self.change_button.clicked.connect(self.change_button_pessed) # Обработчик кнопки "Внести изменения"
+        #self.change_button.clicked.connect(self.change_button_pessed) # Обработчик кнопки "Внести изменения"
         self.Main_Table.verticalHeader().sectionClicked.connect(self.select_row_number)  # Обработчик события нажатия на заголовок строки, возвращает номер выделенной строки
         self.delete_button.clicked.connect(self.delete_row)            # Обработчик кнопки "Удалить строку"
         self.append_button.clicked.connect(self.insert_data)           # Обработчик кнопки "Добавить строку"
         self.change_win.data[str, str, str].connect(self.new_data_row) # Обработчик события передачи и вставки новой строки
         self.search_button.clicked.connect(self.search_window)         # Обработчик кнопки вызова окна поиска
+        self.input_button.clicked.connect(self.enter)                  # Обработчик кнопки "Войти"
 
 # Создание окна для внесения новых записей в БД
 class Change_form(QWidget):
