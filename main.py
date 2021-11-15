@@ -39,6 +39,7 @@ def error_window(messege, title='Ошибка!'):
     message_box.exec_()
 
 
+
 class Main_window(QMainWindow):
 
     # Подключение действий в основной класс
