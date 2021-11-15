@@ -136,12 +136,15 @@ def search_in_base(data_base, table, data):
 
 # Функция проверки имени пользователя и пароля
 def check_enter(name, password):
-    connection = sqlite3.connect('users.db')  # Подключение к БД с паролями
-    cursor = connection.cursor()
-    qwery = f"SELECT * FROM users WHERE [Имя] = '{name}' AND [Пароль] = '{password}'"
-    cursor.execute(qwery)
-    result = cursor.fetchall()
-    if len(result) != 0:
-        return True
-    else:
-        return False
+    try:
+        connection = sqlite3.connect('users.db')  # Подключение к БД с паролями
+        cursor = connection.cursor()
+        qwery = f"SELECT * FROM users WHERE [Имя] = '{name}' AND [Пароль] = '{password}'"
+        cursor.execute(qwery)
+        result = cursor.fetchall()
+        if len(result) != 0:
+            return True
+        else:
+            return False
+    except:
+        return None
