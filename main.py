@@ -232,19 +232,53 @@ class Main_window(QMainWindow):
         password = self.password_lineEdit.text()
         if user_name !='' and password != '':
             fild_flag = True
-        # Проверка на уже выполненый вход
-        if self.change_flag is False:
+        elif user_name == '' or password == '':
+            fild_flag = False
+        else:
+            fild_flag = False
+
+        # Проверка на уже выполненый вход и заполненые поля ввода
+        if self.change_flag is False and fild_flag:
             enter_flag = check_enter(user_name, password)
             # Действия после проверки имени и пароля
             if enter_flag:
                 self.change_flag = True
                 self.change_signal_label.setText('Вход выполнен: режим редактирования ативен')
                 self.change_signal_label_2.setText('Пользователь: ' + user_name)
+                self.delete_button.setEnabled(True)  # Активация кнопки "удалить строку"
+                self.append_button.setEnabled(True)  # Активация кнопки "добавить строку"
             elif enter_flag is False:
                 message_window('Неверное имя пользователя или пароль', ' Вход не выполнен')
             elif enter_flag is None:
                 error_window('Ошибка входа')
+        elif self.change_flag:
+            message_window('Вход уже выполнен!', 'Сообщение')
+        elif fild_flag is False:
+            message_window('Неверное имя пользователя или пароль', 'Ошибка входа')
 
+    # Функция выхода из аккаунта
+    def exit_account(self):
+        reply = QMessageBox.question(self, 'Подтверждение', 'Выйти из аккаунта?', QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        # Если ответ 'YES' то выполняется выход
+        # Если ответ 'NO' то ничего не происходит пользователь дальше активен
+        if reply == QMessageBox.Yes:
+            self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
+            self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
+            self.change_flag = False
+            self.password_lineEdit.clear()  # Очистка полей посде выхода
+            self.username_lineEdit.clear()
+            self.change_signal_label.setText('Вход не выполнен: режим просмотра')
+            self.statusBar().showMessage('Выход из аккауна выполнен')
+
+
+    # Функция работы Кнопки показать пароль
+    def show_password(self):
+        mode = self.password_lineEdit.echoMode()   # От тут меня прёт разница в e и E, капец не очевидно в документации, 20 минут искал и случайно догадался, а так да, работает
+        if mode == 0:
+            self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)
+        elif mode == 2:
+            self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Normal)
 
 
 
@@ -289,6 +323,9 @@ class Main_window(QMainWindow):
         self.change_win.data[str, str, str].connect(self.new_data_row) # Обработчик события передачи и вставки новой строки
         self.search_button.clicked.connect(self.search_window)         # Обработчик кнопки вызова окна поиска
         self.input_button.clicked.connect(self.enter)                  # Обработчик кнопки "Войти"
+        self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)  # По умолчанию ключ скрыт
+        self.show_password_button.clicked.connect(self.show_password)     # Обработчик кнопки показать пароль
+        self.exit_account_button.clicked.connect(self.exit_account)       # Обработчик кнопки "Выход из учётной записи"
 
 # Создание окна для внесения новых записей в БД
 class Change_form(QWidget):
