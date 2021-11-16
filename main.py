@@ -13,7 +13,7 @@ from back import *
 """
 написать меню, хелп, о программе
 добавить настройки при начале работы типа указать программу для открытия PDF
-Написать форму для просмотра журнала изменений
+Написать форму для просмотра журнала изменений, нужен ли при просмотре активный пользователь?
 """
 
 gl_base = ''  # Глобальная переменная для имени активной базы
@@ -36,7 +36,6 @@ def error_window(messege, title='Ошибка!'):
     message_box.setIcon(QMessageBox.Warning)
     message_box.setWindowIcon(QIcon('ошибка.png'))
     message_box.exec_()
-
 
 
 class Main_window(QMainWindow):
@@ -156,7 +155,7 @@ class Main_window(QMainWindow):
         except:
             self.statusBar().showMessage('Ошибка замены названия детали')
 
-    # Функция смены режимов редактирования и просмотра
+    # Функция смены режимов редактирования и просмотра (уже не используется)
     def change_button_pessed(self):
         self.change_flag = not self.change_flag   # Инверсия логического значения флага при нажатии
         if self.change_flag:
@@ -282,6 +281,10 @@ class Main_window(QMainWindow):
         elif mode == 2:
             self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Normal)
 
+    # Функция работы кнопки "журнал"
+    def show_log_journal(self):
+        self.log_win.show()
+
 
     # Основная функция приложения
     def __init__(self):
@@ -293,6 +296,8 @@ class Main_window(QMainWindow):
 
         self.search_win = Search_form()    # Создание экземпляра класса Search_form
         self.search_win.setWindowIcon(QIcon('фонарик.png'))  # Установка значка для окна поиска
+
+        self.log_win = Log_form()  # Создание экземпляра класса Log_form
 
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
@@ -328,6 +333,7 @@ class Main_window(QMainWindow):
         self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)  # По умолчанию ключ скрыт
         self.show_password_button.clicked.connect(self.show_password)     # Обработчик кнопки показать пароль
         self.exit_account_button.clicked.connect(self.exit_account)       # Обработчик кнопки "Выход из учётной записи"
+        self.show_log_button.clicked.connect(self.show_log_journal)       # обработчик кнопки "журнал"
 
 # Создание окна для внесения новых записей в БД
 class Change_form(QWidget):
@@ -446,6 +452,13 @@ class Search_form(QWidget):
         else:
             # Окошко предупреждения о не выбранной таблице и/или базе
             message_window('Невыбрана база или таблица')
+
+# Создание окна журнала
+class Log_form(QWidget):
+    def __init__(self):
+        super(Log_form, self).__init__()
+        loadUi('logform.ui', self)
+
 
 # Запуск приложения
 if __name__ == '__main__':
