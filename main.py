@@ -11,7 +11,6 @@ import os
 from back import *
 
 """
-написать систему аккаунтов
 написать систему ведения журнала
 написать меню, хелп, о программе
 добавить настройки при начаде работы типа указать программу для открытия PDF
@@ -247,6 +246,7 @@ class Main_window(QMainWindow):
                 self.change_signal_label_2.setText('Пользователь: ' + user_name)
                 self.delete_button.setEnabled(True)  # Активация кнопки "удалить строку"
                 self.append_button.setEnabled(True)  # Активация кнопки "добавить строку"
+                self.activ_user = user_name          # Присвоение имени пользователя
             elif enter_flag is False:
                 message_window('Неверное имя пользователя или пароль', ' Вход не выполнен')
             elif enter_flag is None:
@@ -270,6 +270,7 @@ class Main_window(QMainWindow):
             self.username_lineEdit.clear()
             self.change_signal_label.setText('Вход не выполнен: режим просмотра')
             self.statusBar().showMessage('Выход из аккауна выполнен')
+            self.activ_user = ''  # Сброс имени пользователя
 
 
     # Функция работы Кнопки показать пароль
@@ -306,9 +307,10 @@ class Main_window(QMainWindow):
         self.search_button.setIconSize(QSize(35, 35))
 
         # Переменные
-        self.change_flag = False             # Переменная состояния флага редактирования по умолчанию режим просмотра
-        self.table_names = []                # Массив для имён таблиц
-        self.selected_row = -1               # Переменная номер выделенной строки
+        self.change_flag = False          # Переменная состояния флага редактирования по умолчанию режим просмотра
+        self.table_names = []             # Массив для имён таблиц
+        self.selected_row = -1            # Переменная номер выделенной строки
+        self.activ_user = ''              # Имя активного пользователя
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
