@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date, datetime
 
 # Функция получения имён и количества таблиц в базе
 def names_tables(data_base):
@@ -142,9 +143,28 @@ def check_enter(name, password):
         qwery = f"SELECT * FROM users WHERE [Имя] = '{name}' AND [Пароль] = '{password}'"
         cursor.execute(qwery)
         result = cursor.fetchall()
+        cursor.close()
+        connection.close()
         if len(result) != 0:
             return True
         else:
             return False
     except:
         return None
+
+# Функция внесения записей в журнал изменений
+# На входе: дата, имя пользователя, объект над которым совершаются действия, само действие
+def log_journal_writter(user_name, target, action):
+    try:
+        connection = sqlite3.connect('log.db')
+        cursor = connection.cursor()
+        date = datetime.now()
+        date_write = "{}.{}.{} {}.{}".format(date.day, date.month, date.year, date.hour, date.minute) # Формирование даты
+        log_qwery = f"INSERT INTO log_journal ([Дата],[Пользователь],[Объект],[Действие]) VALUES ('{date_write}','{user_name}','{target}','{action}');"
+        cursor.execute(log_qwery)
+        cursor.close()
+        connection.commit()
+        connection.close()
+        return True
+    except:
+        return False

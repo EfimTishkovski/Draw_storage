@@ -11,9 +11,9 @@ import os
 from back import *
 
 """
-написать систему ведения журнала
 написать меню, хелп, о программе
-добавить настройки при начаде работы типа указать программу для открытия PDF
+добавить настройки при начале работы типа указать программу для открытия PDF
+Написать форму для просмотра журнала изменений
 """
 
 gl_base = ''  # Глобальная переменная для имени активной базы
@@ -131,27 +131,27 @@ class Main_window(QMainWindow):
             link = QFileDialog.getOpenFileName(self, 'Новый чертёж', '', '*.pdf')[0]  # Получение новой ссылки
             old_link = item.text()                                                    # Старая ссылка
             name_column = self.Main_Table.horizontalHeaderItem(item.column()) # Получение имени столбца
-            print(name_column.text)
-            second_item = self.Main_Table.item(item.row(), 1)  # Получение номера чертежа (если ссылки вдруг динаковые)
+            second_item = self.Main_Table.item(item.row(), 0)  # Получение номера чертежа (если ссылки вдруг одинаковые)
             self.Main_Table.setItem(item.row(), item.column(),
                                 QtWidgets.QTableWidgetItem(str(link)))  # Установка новой ссылки в выбранную ячейку
             # Замена ссылки, работает таже функция, что и для замены названия чертежа
             reload_data(gl_base, gl_table, old_link, link, second_item.text(), name_column.text())
+            log_journal_writter(self.activ_user, second_item.text(), 'Замена чертежа') # Запись в журнал
             return True
         except sqlite3.Error as error:
             self.statusBar().showMessage('Ошибка замены чертежа', error)
 
-    # Функция замены имени чертежа (детали) в базе
+    # Функция замены названия чертежа (детали) в базе
     def new_item_cell(self, row, column, old_data, second_old_data):
+        # second_old_data номер чертежа у которого меняется название
         try:
             text, ok = QInputDialog.getText(self, 'Замена названия чертежа', 'Введите новое имя:')
 
             if ok:
                 self.Main_Table.setItem(row, column, QtWidgets.QTableWidgetItem(text))   # Установка нового значения в выбранную ячейку
-                #base = self.line_base_name.text()                                        # Текущая база данных
-                #activ_table = self.table_list.currentText()                              # Активная таблица
                 name_column = self.Main_Table.horizontalHeaderItem(row + 1)              # Получение имени столбца
-                reload_data(gl_base, gl_table, old_data, text, second_old_data, name_column.text())          # Замена значения а БД
+                reload_data(gl_base, gl_table, old_data, text, second_old_data, name_column.text())  # Замена значения а БД
+                log_journal_writter(self.activ_user, second_old_data, 'Изменение названия')   # Запись в журнал изменений
                 self.statusBar().showMessage('Название детали заменено')
         except:
             self.statusBar().showMessage('Ошибка замены названия детали')
@@ -181,6 +181,7 @@ class Main_window(QMainWindow):
                     self.Main_Table.removeRow(row)
                     run = delete_row(gl_base, gl_table, number_draw)  # Само удаление строки, run получает True или False
                     if run:
+                        log_journal_writter(self.activ_user, number_draw, 'Чертёж удалён')  # Запись в журнал об удалении
                         self.statusBar().showMessage('Строка удалена')
                     else:
                         self.statusBar().showMessage('Ошибка удаления строки: не отработала функция')
@@ -214,6 +215,7 @@ class Main_window(QMainWindow):
         try:
             insert_draw(gl_base, gl_table,number, name, link)
             self.info_table_show()   # Обновление таблицы в главном окне (по факту отрисовка её заново)
+            log_journal_writter(self.activ_user, number, 'Добавлена новая деталь')  # Запись в журнал изменений
             self.statusBar().showMessage('Данные успешно добавлены')
         except:
             self.statusBar().showMessage('Ошибка добавления данных')
@@ -272,7 +274,6 @@ class Main_window(QMainWindow):
             self.statusBar().showMessage('Выход из аккауна выполнен')
             self.activ_user = ''  # Сброс имени пользователя
 
-
     # Функция работы Кнопки показать пароль
     def show_password(self):
         mode = self.password_lineEdit.echoMode()   # От тут меня прёт разница в e и E, капец не очевидно в документации, 20 минут искал и случайно догадался, а так да, работает
@@ -280,7 +281,6 @@ class Main_window(QMainWindow):
             self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)
         elif mode == 2:
             self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Normal)
-
 
 
     # Основная функция приложения
