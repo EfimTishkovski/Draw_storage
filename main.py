@@ -12,7 +12,7 @@ from back import *
 
 """
 написать меню, хелп, о программе
-добавить настройки при начале работы типа указать программу для открытия PDF
+добавить настройки при начале работы типа указать программу для открытия PDF + сделать запоминане программы
 """
 
 gl_base = ''  # Глобальная переменная для имени активной базы
@@ -42,17 +42,17 @@ class Main_window(QMainWindow):
     # Подключение действий в основной класс
     def _connectAction(self):
         self.openAction.triggered.connect(self.openfile)
-        self.pach_to_PDF_program.triggered.connect(self.pach_to_PDF_function) # Само действие, запуск функции
+        self.patch_to_PDF_program.triggered.connect(self.patch_to_PDF_function) # Само действие, запуск функции
     # Действие
     def _createActions(self):
-        self.openAction = QAction('Открыть', self)
-        self.pach_to_PDF_program = QAction('Программа для открытия PDF',self)   # Создание действия при нажатии на строчку меню
+        self.openAction = QAction('Открыть', self) # Возможно не задействованно
+        self.patch_to_PDF_program = QAction('Программа для открытия PDF',self)   # Создание действия при нажатии на строчку меню
 
     def _createMenuBar(self):
         menuBar = self.menuBar()
         fileMenu = QMenu("Настройки", self)
         menuBar.addMenu(fileMenu)
-        fileMenu.addAction(self.pach_to_PDF_program) # Создание строчки меню
+        fileMenu.addAction(self.patch_to_PDF_program) # Создание строчки меню
         helpMenu = menuBar.addMenu("Помощь")
         menuBar.addMenu(helpMenu)
     # Функция отображения выбранной таблицы в основном табличном виджете
@@ -105,7 +105,8 @@ class Main_window(QMainWindow):
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии
                 path = item.text()
                 # Путь к программе открывабщей pdf-файлы
-                path_to_acrobat = os.path.abspath('C:\Program Files (x86)\Foxit Software\Foxit PhantomPDF\FoxitPhantomPDF.exe')
+                #path_to_acrobat = os.path.abspath('C:\Program Files (x86)\Foxit Software\Foxit PhantomPDF\FoxitPhantomPDF.exe')
+                path_to_acrobat = self.patch_to_pdf       # Путь к проге заданной пользователем
 
                 # Открытие документа, все страницы
                 process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False,stdout=subprocess.PIPE)
@@ -285,8 +286,27 @@ class Main_window(QMainWindow):
     def show_log_journal(self):
         self.log_win.show()
 
-    def pach_to_PDF_function(self):
-        self.pach_pdf.show()
+    # Функция запуска окна указания программы для PDF
+    def patch_to_PDF_function(self):
+        self.patch_pdf.show()
+
+    # Функция передачи пути к PDF программе
+    def link_PDF_program(self, link, check_state):
+        self.patch_to_pdf = link
+        if check_state == 2:
+            memory_link_function(link)
+
+    # Функция проверки наличия ссылки на программу для открытия PDF
+    def pdf_link_check(self):
+        link = memory_link_function('read')  # Получение ссылки из базы при запуске программы
+        print(link[0][0])
+        self.patch_to_pdf = link[0][0]
+        if self.patch_to_pdf:
+            self.pdf_program.setText(link[0][0])
+        else:
+            self.pdf_program.setText('Не найдена!')
+
+
 
     # Основная функция приложения
     def __init__(self):
@@ -300,7 +320,7 @@ class Main_window(QMainWindow):
         self.search_win.setWindowIcon(QIcon('фонарик.png'))  # Установка значка для окна поиска
 
         self.log_win = Log_form()  # Создание экземпляра класса Log_form
-        self.pach_pdf = PDF_program_form() # Создание экземпляра класса PDF_program_form
+        self.patch_pdf = PDF_program_form() # Создание экземпляра класса PDF_program_form
 
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
@@ -319,11 +339,13 @@ class Main_window(QMainWindow):
         self.table_names = []             # Массив для имён таблиц
         self.selected_row = -1            # Переменная номер выделенной строки
         self.activ_user = ''              # Имя активного пользователя
+        self.patch_to_pdf = ''            # Путь к программе для открытия PDF файлов
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
         self._connectAction()  # Подключение действий при нажатии пунктов меню к основной функции
         self._createMenuBar()  # Подключение меню к строке меню
+        self.pdf_link_check()  # Проверка наличия ссылки на прогу для открытия PDF файлов
         self.connect_base_button.clicked.connect(self.openfile)       # Обработчик кнопки "Подключить базу"
         self.table_list.activated[str].connect(self.info_table_show)  # Обработчик смены таблицы в выпадающем списке
         self.Main_Table.itemClicked.connect(self.show_drawing)        # Обработчик клика на ячейку, показывает чертёж
@@ -337,6 +359,7 @@ class Main_window(QMainWindow):
         self.show_password_button.clicked.connect(self.show_password)     # Обработчик кнопки показать пароль
         self.exit_account_button.clicked.connect(self.exit_account)       # Обработчик кнопки "Выход из учётной записи"
         self.show_log_button.clicked.connect(self.show_log_journal)       # обработчик кнопки "журнал"
+        self.patch_pdf.patch[str, int].connect(self.link_PDF_program)          # Обработчик оплучения ссылки(пути) к PDF проге
 
 # Создание окна для внесения новых записей в БД
 class Change_form(QWidget):
@@ -478,9 +501,34 @@ class Log_form(QWidget):
 
 # Создание окна для указания программы открытия PDF файлов
 class PDF_program_form(QWidget):
+    patch = pyqtSignal(str, int)  # Сигнал для передачи пути
+
     def __init__(self):
         super(PDF_program_form, self).__init__()
-        loadUi('pach_to_PDF_form.ui', self)
+        loadUi('patch_to_PDF_form.ui', self)
+        self.overview_pushButton.clicked.connect(self.way_to_program)   # Обработчик нажатия на кнопку "Обзор"
+        self.buttonBox.clicked.connect(self.button_click)               # Обработчи нажатия Ok/Cancel
+
+    def way_to_program(self):
+        patch = QFileDialog.getOpenFileName(self, 'Указать путь', '', '*.exe')[0]  # Получение пути
+        self.patch_lineEdit.setText(patch)
+
+    def button_click(self, button):
+        pressed_button = self.buttonBox.standardButton(button)  # Обработка нажптия на кнопку (любую ok или cancel)
+        if pressed_button == QtWidgets.QDialogButtonBox.Ok:
+            # Проверка на не пустой ввод
+            if self.patch_lineEdit.text() != '':
+                # Отправка сигнала с данными в основное окно
+                self.patch.emit(self.patch_lineEdit.text(), self.memory_link_checkBox.checkState()) # Отправка значения через сигнал
+                #print(self.memory_link_checkBox.checkState())
+                self.patch_lineEdit.clear() # Очистка окна
+                self.close()
+            else:
+                message_window('Пустая ссылка', 'Сообщение')
+        elif pressed_button == QtWidgets.QDialogButtonBox.Cancel:
+            self.close()
+
+
 
 # Запуск приложения
 if __name__ == '__main__':

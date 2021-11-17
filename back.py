@@ -173,3 +173,23 @@ def log_journal_writter(user_name, target, action):
         return True
     except:
         return False
+
+# Функция записи и чтения пути к программе для открытия PDF
+def memory_link_function(state, link=''):
+    try:
+        connection = sqlite3.connect('users.db')
+        cursor = connection.cursor()
+        # Выбор действия чтения или запись
+        if state == 'write':
+            qwery = f"UPDATE system SET value = '{link}' WHERE varibal = 'patch_to_pdf'"
+        elif state == 'read':
+            qwery = f"SELECT value FROM system WHERE varibal = 'patch_to_pdf'"
+        cursor.execute(qwery)
+        link_to_pdf = cursor.fetchall()
+        cursor.close()
+        connection.commit()
+        connection.close()
+        return link_to_pdf
+    except sqlite3.Error as error:
+        print('Ошибка поиска 12', error)
+        return False
