@@ -458,7 +458,21 @@ class Log_form(QWidget):
     def __init__(self):
         super(Log_form, self).__init__()
         loadUi('logform.ui', self)
+        self.show_table_info()
 
+    # Функция отображения данных в окне журнала
+    def show_table_info(self):
+        names_columns_log = names_columns('log.db', 'log_journal')   # Получение имён столбцов
+        data = load_data('log.db', 'log_journal')                    # Получение данных из базы
+        self.log_tableWidget.setColumnCount(len(names_columns_log))        # Устанавливаем количество столбцов
+        self.log_tableWidget.setHorizontalHeaderLabels(names_columns_log)  # Выводим имена заголовков в таблицу
+        self.log_tableWidget.setRowCount(len(data))                  # Установка количества строк
+        # Передача данных в таблицу
+        for row in range(len(data)):
+            for column in range(len(data[row])):
+                self.log_tableWidget.setItem(row, column, QtWidgets.QTableWidgetItem(str(data[row][column])))
+                print(data[row][column])
+        self.log_tableWidget.resizeColumnsToContents()  # Подгонка размеров колонок по содержимому
 
 # Запуск приложения
 if __name__ == '__main__':
