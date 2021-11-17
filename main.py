@@ -1,18 +1,18 @@
 from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, \
-    QFileDialog, QInputDialog, QMessageBox, QWidget, QCheckBox, QMenu
+    QFileDialog, QInputDialog, QMessageBox, QWidget, QMenu
 from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import sys
 import subprocess
-import os
 from back import *
 
 """
 написать меню, хелп, о программе
-добавить настройки при начале работы типа указать программу для открытия PDF + сделать запоминане программы
+добавить окно подтверждения выхода
+проверить и подчистить код
 """
 
 gl_base = ''  # Глобальная переменная для имени активной базы
@@ -35,7 +35,6 @@ def error_window(messege, title='Ошибка!'):
     message_box.setIcon(QMessageBox.Warning)
     message_box.setWindowIcon(QIcon('ошибка.png'))
     message_box.exec_()
-
 
 class Main_window(QMainWindow):
 
@@ -294,7 +293,11 @@ class Main_window(QMainWindow):
     def link_PDF_program(self, link, check_state):
         self.patch_to_pdf = link
         if check_state == 2:
-            memory_link_function(link)
+            # Если галка стоит то сохраняем ссылку в базу
+            memory_link_function('write', link)
+            self.pdf_program.setText(link)
+        elif check_state == 0:
+            self.pdf_program.setText(link)
 
     # Функция проверки наличия ссылки на программу для открытия PDF
     def pdf_link_check(self):
@@ -305,8 +308,6 @@ class Main_window(QMainWindow):
             self.pdf_program.setText(link[0][0])
         else:
             self.pdf_program.setText('Не найдена!')
-
-
 
     # Основная функция приложения
     def __init__(self):
@@ -359,7 +360,7 @@ class Main_window(QMainWindow):
         self.show_password_button.clicked.connect(self.show_password)     # Обработчик кнопки показать пароль
         self.exit_account_button.clicked.connect(self.exit_account)       # Обработчик кнопки "Выход из учётной записи"
         self.show_log_button.clicked.connect(self.show_log_journal)       # обработчик кнопки "журнал"
-        self.patch_pdf.patch[str, int].connect(self.link_PDF_program)          # Обработчик оплучения ссылки(пути) к PDF проге
+        self.patch_pdf.patch[str, int].connect(self.link_PDF_program)     # Обработчик оплучения ссылки(пути) к PDF проге
 
 # Создание окна для внесения новых записей в БД
 class Change_form(QWidget):
@@ -528,12 +529,9 @@ class PDF_program_form(QWidget):
         elif pressed_button == QtWidgets.QDialogButtonBox.Cancel:
             self.close()
 
-
-
 # Запуск приложения
 if __name__ == '__main__':
     app = QApplication(sys.argv)                   # Новый объет приложения экземпляр класса Qtapplication, sys.arg - список аргументов ком. строки
     window = Main_window()                         # Создание экземпляра класса Main_window
-    window.setWindowIcon(QIcon('virtualbox.png'))  # Установка значка приложения
     window.show()                                  # Показать окно на экране
     sys.exit(app.exec_())                          # Запуск основного цикла приложения sys.exit() гарантирует чистый выход
