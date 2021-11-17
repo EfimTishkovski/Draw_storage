@@ -1,6 +1,6 @@
 from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, \
-    QFileDialog, QInputDialog, QMessageBox, QWidget, QCheckBox
+    QFileDialog, QInputDialog, QMessageBox, QWidget, QCheckBox, QMenu
 from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets
@@ -13,7 +13,6 @@ from back import *
 """
 написать меню, хелп, о программе
 добавить настройки при начале работы типа указать программу для открытия PDF
-Написать форму для просмотра журнала изменений, нужен ли при просмотре активный пользователь?
 """
 
 gl_base = ''  # Глобальная переменная для имени активной базы
@@ -43,10 +42,19 @@ class Main_window(QMainWindow):
     # Подключение действий в основной класс
     def _connectAction(self):
         self.openAction.triggered.connect(self.openfile)
+        self.pach_to_PDF_program.triggered.connect(self.pach_to_PDF_function) # Само действие, запуск функции
     # Действие
     def _createActions(self):
         self.openAction = QAction('Открыть', self)
+        self.pach_to_PDF_program = QAction('Программа для открытия PDF',self)   # Создание действия при нажатии на строчку меню
 
+    def _createMenuBar(self):
+        menuBar = self.menuBar()
+        fileMenu = QMenu("Настройки", self)
+        menuBar.addMenu(fileMenu)
+        fileMenu.addAction(self.pach_to_PDF_program) # Создание строчки меню
+        helpMenu = menuBar.addMenu("Помощь")
+        menuBar.addMenu(helpMenu)
     # Функция отображения выбранной таблицы в основном табличном виджете
     # Выбранная таблица не должна быть пустой, нужна хотя бы одна запись! (Может потом сделаю отлов этого бага)
     def info_table_show(self):
@@ -154,14 +162,6 @@ class Main_window(QMainWindow):
                 self.statusBar().showMessage('Название детали заменено')
         except:
             self.statusBar().showMessage('Ошибка замены названия детали')
-
-    # Функция смены режимов редактирования и просмотра (уже не используется)
-    def change_button_pessed(self):
-        self.change_flag = not self.change_flag   # Инверсия логического значения флага при нажатии
-        if self.change_flag:
-            self.change_signal_label.setText('Вход выполнен: режим редактирования ативен')
-        else:
-            self.change_signal_label.setText('Вход не выпонен: режим просмотра')
 
     # Функция принятия номера выделонной строки (решение странное)
     def select_row_number(self, row):
@@ -285,6 +285,8 @@ class Main_window(QMainWindow):
     def show_log_journal(self):
         self.log_win.show()
 
+    def pach_to_PDF_function(self):
+        self.pach_pdf.show()
 
     # Основная функция приложения
     def __init__(self):
@@ -298,6 +300,7 @@ class Main_window(QMainWindow):
         self.search_win.setWindowIcon(QIcon('фонарик.png'))  # Установка значка для окна поиска
 
         self.log_win = Log_form()  # Создание экземпляра класса Log_form
+        self.pach_pdf = PDF_program_form() # Создание экземпляра класса PDF_program_form
 
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
@@ -320,10 +323,10 @@ class Main_window(QMainWindow):
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
         self._connectAction()  # Подключение действий при нажатии пунктов меню к основной функции
+        self._createMenuBar()  # Подключение меню к строке меню
         self.connect_base_button.clicked.connect(self.openfile)       # Обработчик кнопки "Подключить базу"
         self.table_list.activated[str].connect(self.info_table_show)  # Обработчик смены таблицы в выпадающем списке
         self.Main_Table.itemClicked.connect(self.show_drawing)        # Обработчик клика на ячейку, показывает чертёж
-        #self.change_button.clicked.connect(self.change_button_pessed) # Обработчик кнопки "Внести изменения"
         self.Main_Table.verticalHeader().sectionClicked.connect(self.select_row_number)  # Обработчик события нажатия на заголовок строки, возвращает номер выделенной строки
         self.delete_button.clicked.connect(self.delete_row)            # Обработчик кнопки "Удалить строку"
         self.append_button.clicked.connect(self.insert_data)           # Обработчик кнопки "Добавить строку"
@@ -471,8 +474,13 @@ class Log_form(QWidget):
         for row in range(len(data)):
             for column in range(len(data[row])):
                 self.log_tableWidget.setItem(row, column, QtWidgets.QTableWidgetItem(str(data[row][column])))
-                print(data[row][column])
         self.log_tableWidget.resizeColumnsToContents()  # Подгонка размеров колонок по содержимому
+
+# Создание окна для указания программы открытия PDF файлов
+class PDF_program_form(QWidget):
+    def __init__(self):
+        super(PDF_program_form, self).__init__()
+        loadUi('pach_to_PDF_form.ui', self)
 
 # Запуск приложения
 if __name__ == '__main__':
