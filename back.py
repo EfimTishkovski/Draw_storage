@@ -159,7 +159,12 @@ def log_journal_writter(user_name, target, action):
         connection = sqlite3.connect('log.db')
         cursor = connection.cursor()
         date = datetime.now()
-        date_write = "{}.{}.{} {}.{}".format(date.day, date.month, date.year, date.hour, date.minute) # Формирование даты
+        # Костыль времени 16:2 -> 16:02
+        if date.minute < 10:
+            minute = '0' + str(date.minute)
+        else:
+            minute = date.minute
+        date_write = "{}.{}.{} {}.{}".format(date.day, date.month, date.year, date.hour, minute) # Формирование даты
         log_qwery = f"INSERT INTO log_journal ([Дата],[Пользователь],[Объект],[Действие]) VALUES ('{date_write}','{user_name}','{target}','{action}');"
         cursor.execute(log_qwery)
         cursor.close()
