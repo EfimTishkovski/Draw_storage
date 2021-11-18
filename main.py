@@ -308,18 +308,18 @@ class Main_window(QMainWindow):
         if check_state == 2:
             # Если галка стоит то сохраняем ссылку в базу
             memory_link_function('write', link)
-            self.pdf_program.setText(link)
+            self.pdf_program_name.setText(link)
         elif check_state == 0:
-            self.pdf_program.setText(link)
+            self.pdf_program_name.setText(link)
 
     # Функция проверки наличия ссылки на программу для открытия PDF
     def pdf_link_check(self):
         link = memory_link_function('read')  # Получение ссылки из базы при запуске программы
         self.patch_to_pdf = link[0][0]
         if self.patch_to_pdf:
-            self.pdf_program.setText(link[0][0])
+            self.pdf_program_name.setText(link[0][0])
         else:
-            self.pdf_program.setText('Не найдена!')
+            self.pdf_program_name.setText('Не найдена!')
 
     # Функция предупреждения о выходе (переопределнние обработчика closeEvent)
     def closeEvent(self, event):
