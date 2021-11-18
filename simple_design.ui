@@ -502,25 +502,17 @@ background-color: rgb(255, 231, 42);</string>
      <string>Программа для просмотра чертежей:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="pdf_program">
+   <widget class="QLineEdit" name="pdf_program_name">
     <property name="geometry">
      <rect>
       <x>350</x>
       <y>620</y>
-      <width>391</width>
-      <height>41</height>
+      <width>470</width>
+      <height>40</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgba(0,0,0,0);</string>
-    </property>
-    <property name="text">
-     <string/>
+     <string notr="true">background-color: rgb(255, 255, 255);</string>
     </property>
    </widget>
   </widget>
