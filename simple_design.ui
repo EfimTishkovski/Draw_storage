@@ -246,12 +246,31 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
       <bold>false</bold>
      </font>
     </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-color: rgb(255, 85, 255);
 font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
     <property name="text">
      <string>Поиск</string>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>поиск.png</normaloff>поиск.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>32</width>
+      <height>32</height>
+     </size>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLineEdit" name="username_lineEdit">
