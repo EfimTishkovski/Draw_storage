@@ -40,21 +40,26 @@ class Main_window(QMainWindow):
     def _connectAction(self):
         self.openAction.triggered.connect(self.openfile)
         self.patch_to_PDF_program.triggered.connect(self.patch_to_PDF_function) # Само действие, запуск функции
-        self.show_manual.triggered.connect(self.show_manuallist) # Само действие: Показать мануал
+        self.show_manual.triggered.connect(self.show_manuallist)                # Само действие: Показать мануал
+        self.show_about_window.triggered.connect(self.about_show)               # Само действие: Показать о программе
     # Действие
     def _createActions(self):
         self.openAction = QAction('Открыть', self) # Возможно не задействованно
         self.patch_to_PDF_program = QAction('Программа для открытия PDF',self)   # Создание действия при нажатии на строчку меню
         self.show_manual = QAction('Показать инструкцию', self)                  # Создание действия при нажатии на строчку меню
+        self.show_about_window = QAction("О программе", self)
 
     def _createMenuBar(self):
-        menuBar = self.menuBar()
-        fileMenu = QMenu("Настройки", self)
-        menuBar.addMenu(fileMenu)
+        menuBar = self.menuBar()                      # Создание строки меню
+        fileMenu = QMenu("Настройки", self)           # Создание меню "Настройки"
+        menuBar.addMenu(fileMenu)                     # Добавление в строку меню экземпляра fileMenu, "Настройки"
         fileMenu.addAction(self.patch_to_PDF_program) # Создание строчки меню
         helpMenu = menuBar.addMenu("Помощь")
-        menuBar.addMenu(helpMenu)
-        helpMenu.addAction(self.show_manual) # Создание строчки меню
+        menuBar.addMenu(helpMenu)                     # Добавление в строку меню экземпляра helpMenu, "Помощь"
+        helpMenu.addAction(self.show_manual)          # Создание строчки меню
+        aboutMenu = QMenu("О программе", self)
+        menuBar.addMenu(aboutMenu)
+        aboutMenu.addAction(self.show_about_window)
 
     # Функция вывода мануала
     def show_manuallist(self):
@@ -325,6 +330,10 @@ class Main_window(QMainWindow):
         else:
             event.ignore()
 
+    # Функция вызова окна "О программе"
+    def about_show(self):
+        self.about_win.show()
+
     # Основная функция приложения
     def __init__(self):
         super(Main_window, self).__init__()
@@ -336,8 +345,9 @@ class Main_window(QMainWindow):
         self.search_win = Search_form()    # Создание экземпляра класса Search_form
         self.search_win.setWindowIcon(QIcon('фонарик.png'))  # Установка значка для окна поиска
 
-        self.log_win = Log_form()  # Создание экземпляра класса Log_form
+        self.log_win = Log_form()           # Создание экземпляра класса Log_form
         self.patch_pdf = PDF_program_form() # Создание экземпляра класса PDF_program_form
+        self.about_win = About_form()       # Созание экземпляра класса About_form
 
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
@@ -541,6 +551,12 @@ class PDF_program_form(QWidget):
                 message_window('Пустая ссылка', 'Сообщение')
         elif pressed_button == QtWidgets.QDialogButtonBox.Cancel:
             self.close()
+
+# Создание окна "О программе"
+class About_form(QWidget):
+    def __init__(self):
+        super(About_form, self).__init__()
+        loadUi('about_form.ui', self)
 
 # Запуск приложения
 if __name__ == '__main__':
