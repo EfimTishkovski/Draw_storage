@@ -340,11 +340,7 @@ class Main_window(QMainWindow):
         loadUi('simple_design.ui', self)
         # Дочерние окна
         self.change_win = Change_form()    # Создание экземпляра класса Change_form
-        self.change_win.setWindowIcon(QIcon('галочка.png'))  # Установка значка для окна добавления чертежа
-
         self.search_win = Search_form()    # Создание экземпляра класса Search_form
-        self.search_win.setWindowIcon(QIcon('фонарик.png'))  # Установка значка для окна поиска
-
         self.log_win = Log_form()           # Создание экземпляра класса Log_form
         self.patch_pdf = PDF_program_form() # Создание экземпляра класса PDF_program_form
         self.about_win = About_form()       # Созание экземпляра класса About_form
@@ -352,12 +348,6 @@ class Main_window(QMainWindow):
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
         self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
-
-        # Програмная вставка иконок в кнопки (эксперимент)
-        self.delete_button.setIcon(QIcon('удалить-64.png'))
-        self.delete_button.setIconSize(QSize(35, 35))
-        self.append_button.setIcon(QIcon('загрузка-обновлений.png'))
-        self.append_button.setIconSize(QSize(35, 35))
 
         # Переменные
         self.change_flag = False          # Переменная состояния флага редактирования по умолчанию режим просмотра
