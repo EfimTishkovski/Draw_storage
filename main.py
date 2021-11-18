@@ -40,10 +40,12 @@ class Main_window(QMainWindow):
     def _connectAction(self):
         self.openAction.triggered.connect(self.openfile)
         self.patch_to_PDF_program.triggered.connect(self.patch_to_PDF_function) # Само действие, запуск функции
+        self.show_manual.triggered.connect(self.show_manuallist) # Само действие: Показать мануал
     # Действие
     def _createActions(self):
         self.openAction = QAction('Открыть', self) # Возможно не задействованно
         self.patch_to_PDF_program = QAction('Программа для открытия PDF',self)   # Создание действия при нажатии на строчку меню
+        self.show_manual = QAction('Показать инструкцию', self)                  # Создание действия при нажатии на строчку меню
 
     def _createMenuBar(self):
         menuBar = self.menuBar()
@@ -52,6 +54,20 @@ class Main_window(QMainWindow):
         fileMenu.addAction(self.patch_to_PDF_program) # Создание строчки меню
         helpMenu = menuBar.addMenu("Помощь")
         menuBar.addMenu(helpMenu)
+        helpMenu.addAction(self.show_manual) # Создание строчки меню
+
+    # Функция вывода мануала
+    def show_manuallist(self):
+        try:
+            path = 'Manual.pdf'
+            path_to_acrobat = self.patch_to_pdf  # Путь к проге заданной пользователем
+            # Открытие документа, все страницы
+            process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False, stdout=subprocess.PIPE)
+            process.wait()
+        except:
+            message_window('Ошибка открытия мануала.\n Проверьте путь к программе для открытия PDF файлов\n '
+                           'Настройки -> Программа для открытия PDF', 'Сообщение')
+
     # Функция отображения выбранной таблицы в основном табличном виджете
     # Выбранная таблица не должна быть пустой, нужна хотя бы одна запись! (Может потом сделаю отлов этого бага)
     def info_table_show(self):
@@ -294,7 +310,6 @@ class Main_window(QMainWindow):
     # Функция проверки наличия ссылки на программу для открытия PDF
     def pdf_link_check(self):
         link = memory_link_function('read')  # Получение ссылки из базы при запуске программы
-        print(link[0][0])
         self.patch_to_pdf = link[0][0]
         if self.patch_to_pdf:
             self.pdf_program.setText(link[0][0])
@@ -333,8 +348,6 @@ class Main_window(QMainWindow):
         self.delete_button.setIconSize(QSize(35, 35))
         self.append_button.setIcon(QIcon('загрузка-обновлений.png'))
         self.append_button.setIconSize(QSize(35, 35))
-        self.search_button.setIcon(QIcon('поиск.png'))
-        self.search_button.setIconSize(QSize(35, 35))
 
         # Переменные
         self.change_flag = False          # Переменная состояния флага редактирования по умолчанию режим просмотра
