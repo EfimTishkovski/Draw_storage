@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date, datetime
+from datetime import datetime
 
 # Функция получения имён и количества таблиц в базе
 def names_tables(data_base):
@@ -12,8 +12,8 @@ def names_tables(data_base):
         cursor.close()                           # Закрытие курсора
         connection.close()                       # Закрытие соединения с БД
         return names_tables, len(names_tables)   # Функция возвращает котртеж([имена таблиц], количество сторбцов)
-    except sqlite3.Error as error:
-        print('Ошибка при подключении к базе', data_base, error)
+    except:
+        return False
 
 # Функция получения имён столбцов в таблице базы
 def names_columns(data_base, table):
@@ -27,8 +27,8 @@ def names_columns(data_base, table):
         cursor.close()
         connection.close()
         return names_column
-    except sqlite3.Error as error:
-        print('Ошибка при подключении к базе', data_base, error)
+    except:
+        return False
 
 # Функция получения информации из базы
 def load_data(data_base, table):
@@ -41,8 +41,8 @@ def load_data(data_base, table):
         cursor.close()
         connection.close()
         return data
-    except sqlite3.Error as error:
-        print('Ошибка при загрузке данных из таблицы', table, error)
+    except:
+        return False
 
 # Функция замены данных в БД (пока в одной ячейке)
 def reload_data(data_base, table, old_data, new_data, second_old_data, column):
@@ -57,8 +57,7 @@ def reload_data(data_base, table, old_data, new_data, second_old_data, column):
         connection.commit()                  # Сохранение изменений
         connection.close()
         return True
-    except sqlite3.Error as error:
-        print('Ошибка при записи данных', table, error) # Возможно сообщение лишнее, показать в приложении не получится
+    except:
         return False
 
 # Функция удаления строки (записи) в БД
@@ -73,8 +72,7 @@ def delete_row(data_base, table, number_draw):
         connection.commit()
         connection.close()
         return True
-    except sqlite3.Error as error:
-        print('Ошибка удаления строки', table, error)
+    except:
         return False
 
 # Функция проверки номера чертежа на совпадение (занят в базе или свободен)
@@ -95,9 +93,8 @@ def number_draw_test(data_base, table, number):
         else:
             data.clear()  # На всякий случай очистка массива данных, их может быть очень много
             return True
-
-    except sqlite3.Error as error:
-        print('Ошибка поиска', error)
+    except:
+        return None
 
 # Функция добавления новой записи (нового чертежа) в БД
 def insert_draw(data_base, table, number, name, link):
@@ -110,8 +107,8 @@ def insert_draw(data_base, table, number, name, link):
         cursor.close()
         connection.commit()
         connection.close()
-    except sqlite3.Error as error:
-        print('Ошибка добавления записи',error)
+    except:
+        return False
 
 # Функция поиска по базе
 def search_in_base(data_base, table, data):
@@ -132,8 +129,8 @@ def search_in_base(data_base, table, data):
         connection.commit()
         connection.close()
         return search_data
-    except sqlite3.Error as error:
-        print('Ошибка поиска', error)
+    except:
+        return False
 
 # Функция проверки имени пользователя и пароля
 def check_enter(name, password):
@@ -190,6 +187,5 @@ def memory_link_function(state, link=''):
         connection.commit()
         connection.close()
         return link_to_pdf
-    except sqlite3.Error as error:
-        print('Ошибка поиска 12', error)
+    except:
         return False

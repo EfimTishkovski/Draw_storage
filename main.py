@@ -11,8 +11,6 @@ from back import *
 
 """
 написать меню, хелп, о программе
-добавить окно подтверждения выхода
-проверить и подчистить код
 """
 
 gl_base = ''  # Глобальная переменная для имени активной базы
@@ -87,10 +85,8 @@ class Main_window(QMainWindow):
                 base_tables = names_tables(gl_base)                # Получение имён таблиц из базы
                 for table in base_tables[0]:                       # Формирование массива с именами таблиц
                     out_list_tablename.append(table[0])
-
                 self.table_list.addItems(out_list_tablename)       # Добавление имён таблиц в выпадающий список
                 self.info_table_show()                             # Отбражение содержимого первой таблицы
-              
                 self.statusBar().showMessage(f'Подключена база: {basename}.')
                 self.line_base_name.setText(basename)         # Вывод пути и имени базы в окошке "Используемая база"
         except:
@@ -103,21 +99,17 @@ class Main_window(QMainWindow):
             if item.column() == 2 and self.change_flag is False:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии
                 path = item.text()
-                # Путь к программе открывабщей pdf-файлы
-                #path_to_acrobat = os.path.abspath('C:\Program Files (x86)\Foxit Software\Foxit PhantomPDF\FoxitPhantomPDF.exe')
                 path_to_acrobat = self.patch_to_pdf       # Путь к проге заданной пользователем
-
                 # Открытие документа, все страницы
                 process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False,stdout=subprocess.PIPE)
                 process.wait()
-
             elif item.column() <= 1 and self.change_flag is False:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии других ячеек
 
             # Запрет на изменение номера чертежа и номера записи в режиме редактирования
             elif item.column() == 0 and self.change_flag is True:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
-                # дописать функцию, с окошком сообщения, что редактирование не возможно
+                message_window('Редактирование не возможно', 'Сообщение')
 
             elif item.column() == 2 and self.change_flag is True:
                 # Замена ссылки на чертёж
@@ -137,10 +129,10 @@ class Main_window(QMainWindow):
         try:
             link = QFileDialog.getOpenFileName(self, 'Новый чертёж', '', '*.pdf')[0]  # Получение новой ссылки
             old_link = item.text()                                                    # Старая ссылка
-            name_column = self.Main_Table.horizontalHeaderItem(item.column()) # Получение имени столбца
+            name_column = self.Main_Table.horizontalHeaderItem(item.column())         # Получение имени столбца
             second_item = self.Main_Table.item(item.row(), 0)  # Получение номера чертежа (если ссылки вдруг одинаковые)
             self.Main_Table.setItem(item.row(), item.column(),
-                                QtWidgets.QTableWidgetItem(str(link)))  # Установка новой ссылки в выбранную ячейку
+                                QtWidgets.QTableWidgetItem(str(link)))                # Установка новой ссылки в выбранную ячейку
             # Замена ссылки, работает таже функция, что и для замены названия чертежа
             reload_data(gl_base, gl_table, old_link, link, second_item.text(), name_column.text())
             log_journal_writter(self.activ_user, second_item.text(), 'Замена чертежа') # Запись в журнал
@@ -158,7 +150,7 @@ class Main_window(QMainWindow):
                 self.Main_Table.setItem(row, column, QtWidgets.QTableWidgetItem(text))   # Установка нового значения в выбранную ячейку
                 name_column = self.Main_Table.horizontalHeaderItem(row + 1)              # Получение имени столбца
                 reload_data(gl_base, gl_table, old_data, text, second_old_data, name_column.text())  # Замена значения а БД
-                log_journal_writter(self.activ_user, second_old_data, 'Изменение названия')   # Запись в журнал изменений
+                log_journal_writter(self.activ_user, second_old_data, 'Изменение названия')          # Запись в журнал изменений
                 self.statusBar().showMessage('Название детали заменено')
         except:
             self.statusBar().showMessage('Ошибка замены названия детали')
@@ -225,11 +217,11 @@ class Main_window(QMainWindow):
 
     # Функция входа в аккаунт
     def enter(self):
-        fild_flag = False # Флаг для обработки условия не пустых полей
-        # Можно и без него, но нехотелось городить множественные вложенные условия
         # Проверка на пустые поля ввода
         user_name = self.username_lineEdit.text()
         password = self.password_lineEdit.text()
+        # fild_flag Флаг для обработки условия не пустых полей
+        # Можно и без него, но нехотелось городить множественные вложенные условия
         if user_name !='' and password != '':
             fild_flag = True
         elif user_name == '' or password == '':
@@ -267,11 +259,11 @@ class Main_window(QMainWindow):
             self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
             self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
             self.change_flag = False
-            self.password_lineEdit.clear()  # Очистка полей посде выхода
+            self.password_lineEdit.clear()        # Очистка полей посде выхода
             self.username_lineEdit.clear()
             self.change_signal_label.setText('Вход не выполнен: режим просмотра')
             self.statusBar().showMessage('Выход из аккауна выполнен')
-            self.activ_user = ''  # Сброс имени пользователя
+            self.activ_user = ''                  # Сброс имени пользователя
 
     # Функция работы Кнопки показать пароль
     def show_password(self):
@@ -308,6 +300,15 @@ class Main_window(QMainWindow):
             self.pdf_program.setText(link[0][0])
         else:
             self.pdf_program.setText('Не найдена!')
+
+    # Функция предупреждения о выходе (переопределнние обработчика closeEvent)
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Сообщение', 'Хотите выйти?', QMessageBox.Yes |
+                                      QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
     # Основная функция приложения
     def __init__(self):
@@ -493,7 +494,7 @@ class Log_form(QWidget):
         data = load_data('log.db', 'log_journal')                    # Получение данных из базы
         self.log_tableWidget.setColumnCount(len(names_columns_log))        # Устанавливаем количество столбцов
         self.log_tableWidget.setHorizontalHeaderLabels(names_columns_log)  # Выводим имена заголовков в таблицу
-        self.log_tableWidget.setRowCount(len(data))                  # Установка количества строк
+        self.log_tableWidget.setRowCount(len(data))                        # Установка количества строк
         # Передача данных в таблицу
         for row in range(len(data)):
             for column in range(len(data[row])):
@@ -521,7 +522,6 @@ class PDF_program_form(QWidget):
             if self.patch_lineEdit.text() != '':
                 # Отправка сигнала с данными в основное окно
                 self.patch.emit(self.patch_lineEdit.text(), self.memory_link_checkBox.checkState()) # Отправка значения через сигнал
-                #print(self.memory_link_checkBox.checkState())
                 self.patch_lineEdit.clear() # Очистка окна
                 self.close()
             else:
