@@ -79,7 +79,7 @@ class Main_window(QMainWindow):
         try:
             enable_table = self.table_list.currentText()                    # Получение имени выбранной таблицы
             global gl_table
-            gl_table = enable_table                                         # Передача имени активной базы в Глобальную переменную
+            gl_table = enable_table                                         # Передача имени активной таблицы в Глобальную переменную
             header_columns = names_columns(gl_base, gl_table)               # Получение заголовков
             self.Main_Table.setColumnCount(len(header_columns))             # Устанавливаем количество столбцов
             self.Main_Table.setHorizontalHeaderLabels(header_columns)       # Выводим имена заголовков в таблицу
@@ -106,6 +106,7 @@ class Main_window(QMainWindow):
                 base_tables = names_tables(gl_base)                # Получение имён таблиц из базы
                 for table in base_tables[0]:                       # Формирование массива с именами таблиц
                     out_list_tablename.append(table[0])
+                self.table_list.clear()                            # Очистка комбобокса перед вставкой имён таблиц
                 self.table_list.addItems(out_list_tablename)       # Добавление имён таблиц в выпадающий список
                 self.info_table_show()                             # Отбражение содержимого первой таблицы
                 self.statusBar().showMessage(f'Подключена база: {basename}.')
@@ -145,6 +146,7 @@ class Main_window(QMainWindow):
         except:
             self.statusBar().showMessage('Ошибка открытия чертежа')
 
+
     # Функция получения новой ссылки на чертёж
     def new_link_draw(self, item):
         try:
@@ -158,8 +160,8 @@ class Main_window(QMainWindow):
             reload_data(gl_base, gl_table, old_link, link, second_item.text(), name_column.text())
             log_journal_writter(self.activ_user, second_item.text(), 'Замена чертежа') # Запись в журнал
             return True
-        except sqlite3.Error as error:
-            self.statusBar().showMessage('Ошибка замены чертежа', error)
+        except:
+            self.statusBar().showMessage('Ошибка замены чертежа')
 
     # Функция замены названия чертежа (детали) в базе
     def new_item_cell(self, row, column, old_data, second_old_data):
