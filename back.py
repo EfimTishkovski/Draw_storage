@@ -189,4 +189,3 @@ def memory_link_function(state, link=''):
         return link_to_pdf
     except:
         return False
-
