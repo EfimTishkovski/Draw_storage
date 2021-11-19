@@ -21,7 +21,7 @@ def names_columns(data_base, table):
         connection = sqlite3.connect(data_base)
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
-        cursor.execute('select * from {}'.format(table))
+        cursor.execute(f"select * from '{table}'")
         line = cursor.fetchone()
         names_column = line.keys()
         cursor.close()
@@ -30,12 +30,13 @@ def names_columns(data_base, table):
     except:
         return False
 
+
 # Функция получения информации из базы
 def load_data(data_base, table):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        load_data_qwery = 'select * from {}'.format(table)   # Запрос на данные из тблицы
+        load_data_qwery = f"select * from '{table}'"   # Запрос на данные из тблицы
         cursor.execute(load_data_qwery)
         data = cursor.fetchall()
         cursor.close()
@@ -50,9 +51,14 @@ def reload_data(data_base, table, old_data, new_data, second_old_data, column):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        # Сам SQL запрос на изменение, также реализованно отслеживание номера чертежа если названия одинаковые
-        reload_data_qwery = f"UPDATE {table} SET [{column}] = '{new_data}' WHERE [{column}] = '{old_data}' AND [Номер] = '{second_old_data}'"
-        cursor.execute(reload_data_qwery)    # Выполонение запроса
+        # Костылик, SQL запрос не видит None, но None тут это строка!!! type str и это засада =)
+        # Для этого если меняется сылка то просто добавляем её в ячейку
+        if column == 'Расположение':
+            reload_data_qwery = f"UPDATE '{table}' SET [{column}] = '{new_data}' WHERE [Номер] = '{second_old_data}'"
+        else:
+            # Сам SQL запрос на изменение, также реализованно отслеживание номера чертежа если названия одинаковые
+            reload_data_qwery = f"UPDATE '{table}' SET [{column}] = '{new_data}' WHERE [{column}] = '{old_data}' AND [Номер] = '{second_old_data}'"
+        cursor.execute(reload_data_qwery)  # Выполонение запроса
         cursor.close()
         connection.commit()                  # Сохранение изменений
         connection.close()
@@ -66,7 +72,7 @@ def delete_row(data_base, table, number_draw):
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
         # SQL запрос на удаление строки
-        delete_row_qwery = f"DELETE FROM {table} WHERE [Номер] = '{number_draw}'"
+        delete_row_qwery = f"DELETE FROM '{table}' WHERE [Номер] = '{number_draw}'"
         cursor.execute(delete_row_qwery)
         cursor.close()
         connection.commit()
