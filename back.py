@@ -174,7 +174,7 @@ def log_journal_writter(user_name, target, action):
 # Функция записи и чтения пути к программе для открытия PDF
 def memory_link_function(state, link=''):
     try:
-        connection = sqlite3.connect('users.db')
+        connection = sqlite3.connect('system.db')
         cursor = connection.cursor()
         # Выбор действия чтения или запись
         if state == 'write':
