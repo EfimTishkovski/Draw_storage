@@ -142,6 +142,7 @@ class Main_window(QMainWindow):
                 self.new_item_cell(item.row(), item.column(), item.text(), second_item.text())
         except:
             self.statusBar().showMessage('Ошибка открытия чертежа')
+            message_window('Неуказанна программа для открытия PDF файлов', 'Сообщение')
 
 
     # Функция получения новой ссылки на чертёж
@@ -168,7 +169,7 @@ class Main_window(QMainWindow):
 
             if ok:
                 self.Main_Table.setItem(row, column, QtWidgets.QTableWidgetItem(text))   # Установка нового значения в выбранную ячейку
-                name_column = self.Main_Table.horizontalHeaderItem(row + 1)              # Получение имени столбца
+                name_column = self.Main_Table.horizontalHeaderItem(column)              # Получение имени столбца
                 reload_data(gl_base, gl_table, old_data, text, second_old_data, name_column.text())  # Замена значения а БД
                 log_journal_writter(self.activ_user, second_old_data, 'Изменение названия')          # Запись в журнал изменений
                 self.statusBar().showMessage('Название детали заменено')

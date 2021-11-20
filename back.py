@@ -50,9 +50,7 @@ def reload_data(data_base, table, old_data, new_data, second_old_data, column):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        print(column, second_old_data)
         if column == 'Расположение':
-            print('ok')
             # Запрос на из менение ссылки (если ссылка пустая NULL или None запена не работала)
             reload_data_qwery = f"UPDATE '{table}' SET [{column}] = '{new_data}' WHERE [Номер] = '{second_old_data}'"
         else:
