@@ -185,7 +185,7 @@ class Main_window(QMainWindow):
     # Функция удаления строки (удаление детали из базы)
     def delete_row(self):
         try:
-            if self.change_flag and self.selected_row > 0:
+            if self.change_flag and self.selected_row >= 0:
                 # Вызов окошка одтверждения действия
                 reply = QMessageBox.question(self, 'Подтверждение', 'Удалить строку?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 # Если ответ 'YES' то функция продолжает работу
@@ -274,19 +274,23 @@ class Main_window(QMainWindow):
 
     # Функция выхода из аккаунта
     def exit_account(self):
-        reply = QMessageBox.question(self, 'Подтверждение', 'Выйти из аккаунта?', QMessageBox.Yes | QMessageBox.No,
+        # Условие проверки наличия активного пользователя(или выполнен вход)
+        if self.activ_user != '':
+            reply = QMessageBox.question(self, 'Подтверждение', 'Выйти из аккаунта?', QMessageBox.Yes | QMessageBox.No,
                                      QMessageBox.No)
-        # Если ответ 'YES' то выполняется выход
-        # Если ответ 'NO' то ничего не происходит пользователь дальше активен
-        if reply == QMessageBox.Yes:
-            self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
-            self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
-            self.change_flag = False
-            self.password_lineEdit.clear()        # Очистка полей посде выхода
-            self.username_lineEdit.clear()
-            self.change_signal_label.setText('Вход не выполнен: режим просмотра')
-            self.statusBar().showMessage('Выход из аккауна выполнен')
-            self.activ_user = ''                  # Сброс имени пользователя
+            # Если ответ 'YES' то выполняется выход
+            # Если ответ 'NO' то ничего не происходит пользователь дальше активен
+            if reply == QMessageBox.Yes:
+                self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
+                self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
+                self.change_flag = False
+                self.password_lineEdit.clear()        # Очистка полей посде выхода
+                self.username_lineEdit.clear()
+                self.change_signal_label.setText('Вход не выполнен: режим просмотра')
+                self.statusBar().showMessage('Выход из аккауна выполнен')
+                self.activ_user = ''                  # Сброс имени пользователя
+        else:
+            message_window('Вход не был выполнен\n Нет активного пользоватнля', 'Сообщение')
 
     # Функция работы Кнопки показать пароль
     def show_password(self):
@@ -486,6 +490,7 @@ class Search_form(QWidget):
                 message_window('Ничего не найдено')
             else:
                 # Вывод результатов поиска в окно
+                self.output_textEdit.clear()
                 for line in out_data:
                     out = ''
                     for element in line:

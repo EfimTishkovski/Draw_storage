@@ -70,7 +70,7 @@ def delete_row(data_base, table, number_draw):
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
         # SQL запрос на удаление строки
-        delete_row_qwery = f"DELETE FROM {table} WHERE [Номер] = '{number_draw}'"
+        delete_row_qwery = f"DELETE FROM '{table}' WHERE [Номер] = '{number_draw}'"
         cursor.execute(delete_row_qwery)
         cursor.close()
         connection.commit()
@@ -85,7 +85,7 @@ def number_draw_test(data_base, table, number):
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
         #SQL запрос на получение номеров чертежей из активной таблицы и поиск совпадений
-        qwery_draw_numbers = f"SELECT [Номер] from {table} WHERE [Номер] = '{number}'"
+        qwery_draw_numbers = f"SELECT [Номер] from '{table}' WHERE [Номер] = '{number}'"
         cursor.execute(qwery_draw_numbers)
         data = cursor.fetchall()
         cursor.close()
@@ -106,7 +106,7 @@ def insert_draw(data_base, table, number, name, link):
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
         # SQL запрос на вставку новых данных в таблицу
-        qwery_draw_insert = f"INSERT INTO {table} ([Номер],[Название],[Расположение]) VALUES ('{number}','{name}','{link}');"
+        qwery_draw_insert = f"INSERT INTO '{table}' ([Номер],[Название],[Расположение]) VALUES ('{number}','{name}','{link}');"
         cursor.execute(qwery_draw_insert)
         cursor.close()
         connection.commit()
@@ -126,7 +126,7 @@ def search_in_base(data_base, table, data):
             column = 'Расположение'
         else:
             column = 'Номер'
-        qwery_search = f"SELECT * FROM {table} WHERE [{column}] = '{data}'"
+        qwery_search = f"SELECT * FROM '{table}' WHERE [{column}] = '{data}'"
         cursor.execute(qwery_search)
         search_data = cursor.fetchall()
         cursor.close()
