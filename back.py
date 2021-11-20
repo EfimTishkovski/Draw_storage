@@ -21,7 +21,7 @@ def names_columns(data_base, table):
         connection = sqlite3.connect(data_base)
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
-        cursor.execute(f"select * from {table}")
+        cursor.execute(f"select * from '{table}'")
         line = cursor.fetchone()
         names_column = line.keys()
         cursor.close()
@@ -35,7 +35,7 @@ def load_data(data_base, table):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        load_data_qwery = f"select * from {table}"   # Запрос на данные из тблицы
+        load_data_qwery = f"select * from '{table}'"   # Запрос на данные из тблицы
         cursor.execute(load_data_qwery)
         data = cursor.fetchall()
         cursor.close()
@@ -50,8 +50,14 @@ def reload_data(data_base, table, old_data, new_data, second_old_data, column):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        # Сам SQL запрос на изменение, также реализованно отслеживание номера чертежа если названия одинаковые
-        reload_data_qwery = f"UPDATE {table} SET [{column}] = '{new_data}' WHERE [{column}] = '{old_data}' AND [Номер] = '{second_old_data}'"
+        print(column, second_old_data)
+        if column == 'Расположение':
+            print('ok')
+            # Запрос на из менение ссылки (если ссылка пустая NULL или None запена не работала)
+            reload_data_qwery = f"UPDATE '{table}' SET [{column}] = '{new_data}' WHERE [Номер] = '{second_old_data}'"
+        else:
+            # Сам SQL запрос на изменение, также реализованно отслеживание номера чертежа если названия одинаковые
+            reload_data_qwery = f"UPDATE '{table}' SET [{column}] = '{new_data}' WHERE [{column}] = '{old_data}' AND [Номер] = '{second_old_data}'"
         cursor.execute(reload_data_qwery)    # Выполонение запроса
         cursor.close()
         connection.commit()                  # Сохранение изменений
