@@ -167,12 +167,14 @@ class Main_window(QMainWindow):
         try:
             text, ok = QInputDialog.getText(self, 'Замена названия чертежа', 'Введите новое имя:')
 
-            if ok:
+            if ok and text != '':
                 self.Main_Table.setItem(row, column, QtWidgets.QTableWidgetItem(text))   # Установка нового значения в выбранную ячейку
                 name_column = self.Main_Table.horizontalHeaderItem(column)              # Получение имени столбца
                 reload_data(gl_base, gl_table, old_data, text, second_old_data, name_column.text())  # Замена значения а БД
                 log_journal_writter(self.activ_user, second_old_data, 'Изменение названия')          # Запись в журнал изменений
                 self.statusBar().showMessage('Название детали заменено')
+            elif ok and text == '':
+                message_window('Название не должно быть пустым', 'Сообщение')
         except:
             self.statusBar().showMessage('Ошибка замены названия детали')
 
