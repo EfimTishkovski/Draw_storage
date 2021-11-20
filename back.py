@@ -21,7 +21,7 @@ def names_columns(data_base, table):
         connection = sqlite3.connect(data_base)
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
-        cursor.execute('select * from {}'.format(table))
+        cursor.execute(f"select * from {table}")
         line = cursor.fetchone()
         names_column = line.keys()
         cursor.close()
@@ -35,7 +35,7 @@ def load_data(data_base, table):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        load_data_qwery = 'select * from {}'.format(table)   # Запрос на данные из тблицы
+        load_data_qwery = f"select * from {table}"   # Запрос на данные из тблицы
         cursor.execute(load_data_qwery)
         data = cursor.fetchall()
         cursor.close()
