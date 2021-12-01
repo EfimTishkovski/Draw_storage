@@ -114,26 +114,39 @@ def insert_draw(data_base, table, number, name, link):
     except:
         return False
 
+# Функция поиска совпадений в данных полученных из таблицы по которой идёт поиск
+def search_in_data(data_mass, parameter, column):
+    out = []
+    for line in data_mass:
+        if line[column].lower() == parameter.lower():
+            out.append(line)
+    return out
+
 # Функция поиска по базе
 def search_in_base(data_base, table, data):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        # Анализ ввода, по результату выбирается столбец
-        if data.isalpha():
-            column = 'Название'
-        elif data[-4:] == '.pdf':
-            column = 'Расположение'
-        else:
-            column = 'Номер'
-        qwery_search = f"SELECT * FROM '{table}' WHERE [{column}] = '{data}'"
-        # Разработка регистронезависимого поиска
+        qwery_search = f"SELECT * FROM '{table}'"
+        # Разработка регистронезависимого поиска Найден новый баг нужно автоматом ставить текущую таблицу
         cursor.execute(qwery_search)
         search_data = cursor.fetchall()
+        # Анализ ввода, по результату выбирается столбец
+        if data.isalpha():
+            # Столбец Название
+            #column = 'Название'
+            out = search_in_data(search_data, data, 1)
+        elif data[-4:] == '.pdf':
+            # Столбец Расположение
+            column = 'Расположение'
+            out = search_in_data(search_data, data, 2)
+        else:
+            # Столбец Номер
+            out = search_in_data(search_data, data, 0)
+            column = 'Номер'
         cursor.close()
-        connection.commit()
         connection.close()
-        return search_data
+        return out
     except:
         return False
 
