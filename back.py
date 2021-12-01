@@ -127,6 +127,7 @@ def search_in_base(data_base, table, data):
         else:
             column = 'Номер'
         qwery_search = f"SELECT * FROM '{table}' WHERE [{column}] = '{data}'"
+        # Разработка регистронезависимого поиска
         cursor.execute(qwery_search)
         search_data = cursor.fetchall()
         cursor.close()
