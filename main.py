@@ -476,6 +476,10 @@ class Search_form(QWidget):
             out_list_tablename.append(table[0])
         self.table_name_comboBox.clear()
         self.table_name_comboBox.addItems(out_list_tablename)       # Добавление имён таблиц в выпадающий список
+        # Установка активной таблицы в комбобоксе при выборе базы по умолчанию
+        if state == Qt.Checked:
+            index = self.table_name_comboBox.findText(gl_table)
+            self.table_name_comboBox.setCurrentIndex(index)        # Установка тактивной таблицы
 
     # Сама функция поиска
     def search(self):
