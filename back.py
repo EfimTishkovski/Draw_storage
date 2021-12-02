@@ -115,10 +115,16 @@ def insert_draw(data_base, table, number, name, link):
         return False
 
 # Функция поиска совпадений в данных полученных из таблицы по которой идёт поиск
-def search_in_data(data_mass, parameter, column):
+# data_mass массив данных в которых идёт поиск, parametr - то что нужно найти
+def search_in_data(data_mass, parameter):
     out = []
+    # Поиск по подстроке
     for line in data_mass:
-        if line[column].lower() == parameter.lower():
+        st_line = ''
+        # Склеиваем кортеж в одну строку
+        for word in line:
+            st_line += word
+        if parameter.lower() in st_line.lower():
             out.append(line)
     return out
 
@@ -131,19 +137,7 @@ def search_in_base(data_base, table, data):
         # Разработка регистронезависимого поиска Найден новый баг нужно автоматом ставить текущую таблицу
         cursor.execute(qwery_search)
         search_data = cursor.fetchall()
-        # Анализ ввода, по результату выбирается столбец
-        if data.isalpha():
-            # Столбец Название
-            #column = 'Название'
-            out = search_in_data(search_data, data, 1)
-        elif data[-4:] == '.pdf':
-            # Столбец Расположение
-            column = 'Расположение'
-            out = search_in_data(search_data, data, 2)
-        else:
-            # Столбец Номер
-            out = search_in_data(search_data, data, 0)
-            column = 'Номер'
+        out = search_in_data(search_data,data)
         cursor.close()
         connection.close()
         return out
