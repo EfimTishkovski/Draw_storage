@@ -71,7 +71,14 @@ class Main_window(QMainWindow):
             process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False, stdout=subprocess.PIPE)
             process.wait()
             """
-            os.startfile('Manual.pdf')
+            if self.pdf_default_program:
+                os.startfile('Manual.pdf')
+            else:
+                path_to_acrobat = self.patch_to_pdf  # Путь к проге заданной пользователем
+                # Открытие документа, все страницы
+                process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', 'Manual.pdf'], shell=False,
+                                           stdout=subprocess.PIPE)
+                process.wait()
         except:
             message_window('Ошибка открытия мануала.\n Файл отсутствует или роверьте путь к программе для открытия PDF файлов\n ',
                            'Сообщение')
@@ -321,7 +328,7 @@ class Main_window(QMainWindow):
             self.pdf_default_program = True
         else:
             self.pdf_default_program = False
-            link = memory_link_function('read')  # Получение ссылки из базы
+            link = memory_link_function('read', 'patch_to_pdf')  # Получение ссылки из базы
             # Если ссылка не получена или ошибка
             if link is False or link[0][0] == '':
                 self.pdf_default_program = True
@@ -330,7 +337,7 @@ class Main_window(QMainWindow):
 
     # Функция проверки наличия ссылки на программу для открытия PDF ПРОВЕРИТЬ АТУАЛЬНОСТЬ ФУНКЦИИ
     def pdf_link_check(self):
-        link = memory_link_function('read')  # Получение ссылки из базы при запуске программы
+        link = memory_link_function('read', 'patch_to_pdf')  # Получение ссылки из базы при запуске программы
         self.patch_to_pdf = link[0][0]
         if self.patch_to_pdf:
             self.pdf_program_name.setText(link[0][0])
@@ -372,6 +379,10 @@ class Main_window(QMainWindow):
         self.activ_user = ''              # Имя активного пользователя
         self.patch_to_pdf = ''            # Путь к программе для открытия PDF файлов
         self.pdf_default_program = True   # Флаг использования проги для открытия pdf True - прога ос, False - своя какая-то
+
+        """
+        Продумать работу загрузки настроек pdf программы, возможно стоит перенести в главное окно
+        """
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
@@ -543,9 +554,25 @@ class PDF_program_form(QWidget):
     def __init__(self):
         super(PDF_program_form, self).__init__()
         loadUi('patch_to_PDF_form.ui', self)
+        self.load_settings_default()                 # получение состояния настроек (состояния чекбокса) при запуске окна
         self.overview_pushButton.clicked.connect(self.way_to_program)   # Обработчик нажатия на кнопку "Обзор"
         self.buttonBox.clicked.connect(self.button_click)               # Обработчи нажатия Ok/Cancel
         self.main_checkBox.stateChanged.connect(self.default_pdf_program)  # Обработчик состояния чекбокса "Использовать программу по умолчанию"
+
+    # Загрузка настроек при вызове окна
+    def load_settings_default(self):
+        state_main_checkBox = memory_link_function('read', 'default_pdf_program') # Получение состояния главного чекбокса из файла system.db
+        patch = memory_link_function('read', 'patch_to_pdf')[0][0]  # Получение ссылки если она есть
+        if state_main_checkBox[0][0]:
+            self.main_checkBox.setChecked(True)
+            # Остальные элементы не активны
+            self.overview_pushButton.setEnabled(False)
+            self.textEdit.setEnabled(False)
+            self.label_2.setEnabled(False)
+            self.textEdit.setText(patch)  # Установка ссылки в окно
+        else:
+            self.main_checkBox.setChecked(False)
+            self.textEdit.setText(patch)          # Установка ссылки в окно
 
     def default_pdf_program(self, state):
         if state == Qt.Checked:
@@ -558,29 +585,31 @@ class PDF_program_form(QWidget):
             # Если галки нет, кнопка обзор активна
             self.overview_pushButton.setEnabled(True)
             self.textEdit.setEnabled(True)
-            self.memory_link_checkBox.setEnabled(True)
             self.label_2.setEnabled(True)
 
 
     def way_to_program(self):
         patch = QFileDialog.getOpenFileName(self, 'Указать путь', '', '*.exe')[0]  # Получение пути
         if patch:
-            self.patch_lineEdit.clear()  # Очистка окна
+            self.textEdit.clear()  # Очистка окна
             self.textEdit.setText(patch)
 
     def button_click(self, button):
         pressed_button = self.buttonBox.standardButton(button)  # Обработка нажптия на кнопку (любую ok или cancel)
         # Галка в чекбоксе стоит
         if pressed_button == QtWidgets.QDialogButtonBox.Ok and self.main_checkBox.checkState() == 2:
-            self.patch.emit(True)
+            memory_link_function('write', 'default_pdf_program', True)  # сохранение состояния чекбокса в файл system.db
+            self.patch.emit(True)  # Отправка значения через сигнал
             self.close()
+
         # Галка в чекбоксе не стоит
         elif pressed_button == QtWidgets.QDialogButtonBox.Ok and self.main_checkBox.checkState() == 0:
             # Проверка на не пустой ввод
-            if self.textEdit.text() != '':
+            if self.textEdit.toPlainText() != '':
                 # Отправка сигнала с данными в основное окно
                 self.patch.emit(False) # Отправка значения через сигнал
-                memory_link_function('write', self.textEdit.text()) # сохранение ссылки в файл system.db
+                memory_link_function('write', 'patch_to_pdf', self.textEdit.toPlainText()) # сохранение ссылки в файл system.db
+                memory_link_function('write', 'default_pdf_program', False)  # сохранение состояния чекбокса в файл system.db
                 #self.patch_lineEdit.clear() # Очистка окна
                 self.close()
             else:

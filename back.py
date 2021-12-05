@@ -184,20 +184,20 @@ def log_journal_writter(user_name, target, action):
         return False
 
 # Функция записи и чтения пути к программе для открытия PDF
-def memory_link_function(state, link=''):
+def memory_link_function(state, varibal, link=''):
     try:
         connection = sqlite3.connect('system.db')
         cursor = connection.cursor()
         # Выбор действия чтения или запись
         if state == 'write':
-            qwery = f"UPDATE system SET value = '{link}' WHERE varibal = 'patch_to_pdf'"
+            qwery = f"UPDATE system SET value = '{link}' WHERE varibal = '{varibal}'"
         elif state == 'read':
-            qwery = f"SELECT value FROM system WHERE varibal = 'patch_to_pdf'"
+            qwery = f"SELECT value FROM system WHERE varibal = '{varibal}'"
         cursor.execute(qwery)
-        link_to_pdf = cursor.fetchall()
+        value = cursor.fetchall()
         cursor.close()
         connection.commit()
         connection.close()
-        return link_to_pdf
+        return value
     except:
         return False
