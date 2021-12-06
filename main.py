@@ -376,6 +376,7 @@ class Main_window(QMainWindow):
         self.activ_user = ''              # Имя активного пользователя
         self.patch_to_pdf = ''            # Путь к программе для открытия PDF файлов
         self.pdf_default_program = True   # Флаг использования проги для открытия pdf True - прога ос, False - своя какая-то
+        self.work_dir = ''                # Переменная для хранения пути к рабочей папке
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
