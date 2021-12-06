@@ -99,9 +99,10 @@ class Main_window(QMainWindow):
     # Функция обработки открытия файла, получения и отображения данных
     def openfile(self):
         try:
-            basename = QFileDialog.getOpenFileName(self, 'Открыть файл', '', '*.db')[0]  # Получение от пользователя имени базы для открытия
+            basename = QFileDialog.getOpenFileName(self, 'Открыть файл', self.work_dir, '*.db')[0]  # Получение от пользователя имени базы для открытия
             if basename:
-                #self.activ_base_name = basename
+                print(basename.partition(self.work_dir))
+                relativ_path_to_base = basename.partition(self.work_dir)[2]
                 global gl_base
                 gl_base = basename      # Передача имени аткивной базы в глобальную переменную, можно использовать в любом классе
 
@@ -112,8 +113,8 @@ class Main_window(QMainWindow):
                 self.table_list.clear()                            # Очистка комбобокса перед вставкой имён таблиц
                 self.table_list.addItems(out_list_tablename)       # Добавление имён таблиц в выпадающий список
                 self.info_table_show()                             # Отбражение содержимого первой таблицы
-                self.statusBar().showMessage(f'Подключена база: {basename}.')
-                self.line_base_name.setText(basename)         # Вывод пути и имени базы в окошке "Используемая база"
+                self.statusBar().showMessage(f'Подключена база: {relativ_path_to_base}.')
+                self.line_base_name.setText(relativ_path_to_base)         # Вывод пути и имени базы в окошке "Используемая база"
         except:
             self.statusBar().showMessage('Ошибка подключения')
 
@@ -123,7 +124,7 @@ class Main_window(QMainWindow):
             # Получение ссылки расположения чертежа из таблички (Main_Table)
             if item.column() == 2 and self.change_flag is False:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии
-                path = item.text()
+                path = self.work_dir + item.text()                        # Путь к чертежу
                 # Отклытие чертежа программа по умолчанию или пользоваьельская
                 if self.pdf_default_program:
                     os.startfile(path)
@@ -157,14 +158,15 @@ class Main_window(QMainWindow):
     # Функция получения новой ссылки на чертёж
     def new_link_draw(self, item):
         try:
-            link = QFileDialog.getOpenFileName(self, 'Новый чертёж', '', '*.pdf')[0]  # Получение новой ссылки
+            link = QFileDialog.getOpenFileName(self, 'Новый чертёж', self.work_dir, '*.pdf')[0]  # Получение новой ссылки
+            relativ_link = link.rpartition(self.work_dir)[2]             # Формирование относительной ссылки
             old_link = item.text()                                                    # Старая ссылка
             name_column = self.Main_Table.horizontalHeaderItem(item.column())         # Получение имени столбца
             second_item = self.Main_Table.item(item.row(), 0)  # Получение номера чертежа (если ссылки вдруг одинаковые)
             self.Main_Table.setItem(item.row(), item.column(),
-                                QtWidgets.QTableWidgetItem(str(link)))                # Установка новой ссылки в выбранную ячейку
+                                QtWidgets.QTableWidgetItem(str(relativ_link)))                # Установка новой ссылки в выбранную ячейку
             # Замена ссылки, работает таже функция, что и для замены названия чертежа
-            reload_data(gl_base, gl_table, old_link, link, second_item.text(), name_column.text())
+            reload_data(gl_base, gl_table, old_link, relativ_link, second_item.text(), name_column.text())
             log_journal_writter(self.activ_user, second_item.text(), 'Замена чертежа') # Запись в журнал
             return True
         except:
@@ -376,7 +378,7 @@ class Main_window(QMainWindow):
         self.activ_user = ''              # Имя активного пользователя
         self.patch_to_pdf = ''            # Путь к программе для открытия PDF файлов
         self.pdf_default_program = True   # Флаг использования проги для открытия pdf True - прога ос, False - своя какая-то
-        self.work_dir = ''                # Переменная для хранения пути к рабочей папке
+        self.work_dir = "E:/Draw_storage_test data/"        # Переменная для хранения пути к рабочей папке
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
