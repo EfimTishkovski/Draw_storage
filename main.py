@@ -64,13 +64,6 @@ class Main_window(QMainWindow):
     # Функция вывода мануала
     def show_manuallist(self):
         try:
-            """
-            path = 'Manual.pdf'
-            path_to_acrobat = self.patch_to_pdf  # Путь к проге заданной пользователем
-            # Открытие документа, все страницы
-            process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False, stdout=subprocess.PIPE)
-            process.wait()
-            """
             if self.pdf_default_program:
                 os.startfile('Manual.pdf')
             else:
@@ -131,10 +124,13 @@ class Main_window(QMainWindow):
             if item.column() == 2 and self.change_flag is False:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии
                 path = item.text()
-                path_to_acrobat = self.patch_to_pdf       # Путь к проге заданной пользователем
-                # Открытие документа, все страницы
-                process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False,stdout=subprocess.PIPE)
-                process.wait()
+                # Отклытие чертежа программа по умолчанию или пользоваьельская
+                if self.pdf_default_program:
+                    os.startfile(path)
+                else:
+                    path_to_acrobat = self.patch_to_pdf       # Путь к проге заданной пользователем
+                    process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False,stdout=subprocess.PIPE)
+                    process.wait()
             elif item.column() <= 1 and self.change_flag is False:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии других ячеек
 
@@ -218,7 +214,6 @@ class Main_window(QMainWindow):
             elif self.change_flag and self.selected_row < 0:
                 # Окошко предупреждения о не выделенной строке
                 message_window('Строка не выбрана!')
-
         except:
             self.statusBar().showMessage('Ошибка удаления строки: Исключение')
 
@@ -329,6 +324,8 @@ class Main_window(QMainWindow):
         else:
             self.pdf_default_program = False
             link = memory_link_function('read', 'patch_to_pdf')  # Получение ссылки из базы
+            print(link[0][0])
+            self.pdf_program_name.setText(link[0][0])
             # Если ссылка не получена или ошибка
             if link is False or link[0][0] == '':
                 self.pdf_default_program = True
@@ -379,10 +376,6 @@ class Main_window(QMainWindow):
         self.activ_user = ''              # Имя активного пользователя
         self.patch_to_pdf = ''            # Путь к программе для открытия PDF файлов
         self.pdf_default_program = True   # Флаг использования проги для открытия pdf True - прога ос, False - своя какая-то
-
-        """
-        Продумать работу загрузки настроек pdf программы, возможно стоит перенести в главное окно
-        """
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
@@ -579,7 +572,6 @@ class PDF_program_form(QWidget):
             # Если галка стоит, то используем прогу по умолчанию в ос
             self.overview_pushButton.setEnabled(False)
             self.textEdit.setEnabled(False)
-            self.memory_link_checkBox.setEnabled(False)
             self.label_2.setEnabled(False)
         else:
             # Если галки нет, кнопка обзор активна
@@ -595,11 +587,11 @@ class PDF_program_form(QWidget):
             self.textEdit.setText(patch)
 
     def button_click(self, button):
-        pressed_button = self.buttonBox.standardButton(button)  # Обработка нажптия на кнопку (любую ok или cancel)
+        pressed_button = self.buttonBox.standardButton(button)          # Обработка нажптия на кнопку (любую ok или cancel)
         # Галка в чекбоксе стоит
         if pressed_button == QtWidgets.QDialogButtonBox.Ok and self.main_checkBox.checkState() == 2:
             memory_link_function('write', 'default_pdf_program', True)  # сохранение состояния чекбокса в файл system.db
-            self.patch.emit(True)  # Отправка значения через сигнал
+            self.patch.emit(True)                                       # Отправка значения через сигнал
             self.close()
 
         # Галка в чекбоксе не стоит
@@ -607,10 +599,9 @@ class PDF_program_form(QWidget):
             # Проверка на не пустой ввод
             if self.textEdit.toPlainText() != '':
                 # Отправка сигнала с данными в основное окно
-                self.patch.emit(False) # Отправка значения через сигнал
                 memory_link_function('write', 'patch_to_pdf', self.textEdit.toPlainText()) # сохранение ссылки в файл system.db
-                memory_link_function('write', 'default_pdf_program', False)  # сохранение состояния чекбокса в файл system.db
-                #self.patch_lineEdit.clear() # Очистка окна
+                memory_link_function('write', 'default_pdf_program', False)                # сохранение состояния чекбокса в файл system.db
+                self.patch.emit(False)  # Отправка значения через сигнал
                 self.close()
             else:
                 message_window('Пустая ссылка', 'Сообщение')
