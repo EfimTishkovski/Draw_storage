@@ -10,9 +10,6 @@ import subprocess
 import os
 from back import *
 
-"""
-Замечания по разработке в test.py
-"""
 gl_base = ''  # Глобальная переменная для имени активной базы
 gl_table = '' # Глобальная переменная для имени активной таблицы
 
@@ -42,7 +39,7 @@ class Main_window(QMainWindow):
         self.patch_to_PDF_program.triggered.connect(self.patch_to_PDF_function) # Само действие, запуск функции
         self.show_manual.triggered.connect(self.show_manuallist)                # Само действие: Показать мануал
         self.show_about_window.triggered.connect(self.about_show)               # Само действие: Показать о программе
-        self.work_dir.triggered.connect(self.path_to_work_dir)                  # Само действие: Указать путь к рабочей папке
+        self.work_dir_select.triggered.connect(self.path_to_work_dir)            # Само действие: Указать путь к рабочей папке
 
     # Действие
     def _createActions(self):
@@ -50,7 +47,7 @@ class Main_window(QMainWindow):
         self.patch_to_PDF_program = QAction('Программа для открытия PDF', self)   # Создание действия при нажатии на строчку меню
         self.show_manual = QAction('Показать инструкцию', self)                   # Создание действия при нажатии на строчку меню
         self.show_about_window = QAction('О программе', self)
-        self.work_dir = QAction('Выбор рабочей папки', self)
+        self.work_dir_select = QAction('Выбор рабочей папки', self)
 
 
     def _createMenuBar(self):
@@ -58,7 +55,7 @@ class Main_window(QMainWindow):
         fileMenu = QMenu("Настройки", self)           # Создание меню "Настройки"
         menuBar.addMenu(fileMenu)                     # Добавление в строку меню экземпляра fileMenu, "Настройки"
         fileMenu.addAction(self.patch_to_PDF_program) # Создание строчки меню
-        fileMenu.addAction(self.work_dir)
+        fileMenu.addAction(self.work_dir_select)
         helpMenu = menuBar.addMenu("Помощь")
         menuBar.addMenu(helpMenu)                     # Добавление в строку меню экземпляра helpMenu, "Помощь"
         helpMenu.addAction(self.show_manual)          # Создание строчки меню
@@ -110,7 +107,7 @@ class Main_window(QMainWindow):
         try:
             basename = QFileDialog.getOpenFileName(self, 'Открыть файл', self.work_dir, '*.db')[0]  # Получение от пользователя имени базы для открытия
             if basename:
-                print(basename.partition(self.work_dir))
+                #print(basename.partition(self.work_dir))
                 relativ_path_to_base = basename.partition(self.work_dir)[2]
                 global gl_base
                 gl_base = basename      # Передача имени аткивной базы в глобальную переменную, можно использовать в любом классе
@@ -364,6 +361,16 @@ class Main_window(QMainWindow):
     def about_show(self):
         self.about_win.show()
 
+    # Функция получения пути к рабочей папке
+    def work_dir_function(self, link):
+        self.work_dir = link
+
+    # Функция загрузки сохраннёного пути при вызове окна
+    def load(self):
+        link = memory_link_function('read', 'path_to_work_dir')[0][0]
+        self.work_dir = link
+
+
     # Основная функция приложения
     def __init__(self):
         super(Main_window, self).__init__()
@@ -379,6 +386,7 @@ class Main_window(QMainWindow):
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
         self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
+        self.load()                           # Загрузка сохранённого пути к рабочей папке
 
         # Переменные
         self.change_flag = False          # Переменная состояния флага редактирования по умолчанию режим просмотра
@@ -387,7 +395,7 @@ class Main_window(QMainWindow):
         self.activ_user = ''              # Имя активного пользователя
         self.patch_to_pdf = ''            # Путь к программе для открытия PDF файлов
         self.pdf_default_program = True   # Флаг использования проги для открытия pdf True - прога ос, False - своя какая-то
-        self.work_dir = "E:/Draw_storage_test data/"        # Переменная для хранения пути к рабочей папке
+        self.work_dir = '' #"E:/Draw_storage_test data/"         Переменная для хранения пути к рабочей папке
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
@@ -408,6 +416,7 @@ class Main_window(QMainWindow):
         self.exit_account_button.clicked.connect(self.exit_account)       # Обработчик кнопки "Выход из учётной записи"
         self.show_log_button.clicked.connect(self.show_log_journal)       # обработчик кнопки "журнал"
         self.patch_pdf.patch[bool].connect(self.link_PDF_program)         # Обработчик оплучения ссылки(пути) к PDF проге
+        self.work_dir_path.patch_to_work_dir[str].connect(self.work_dir_function) # Обработчик получения ссылки на рабочую папку
 
 # Создание окна для внесения новых записей в БД
 class Change_form(QWidget):
@@ -628,9 +637,38 @@ class About_form(QWidget):
 
 # Создания окна указания пути к рабочей папке
 class Way_to_work_dir(QWidget):
+    patch_to_work_dir = pyqtSignal(str)   # Сигнал для передачи пути
+
     def __init__(self):
         super(Way_to_work_dir, self).__init__()
         loadUi('path_to_work_dir_form.ui', self)
+        self.checkBox.setChecked(True)
+        self.load()
+        self.pushButton.clicked.connect(self.way_to_work_dir)
+        self.buttonBox.clicked.connect(self.button_click)      # Обработчи нажатия Ok/Cancel
+
+    # Функция загрузки сохраннёного пути при вызове окна
+    def load(self):
+        link =  memory_link_function('read', 'path_to_work_dir')[0][0]
+        self.textEdit.setText(link)
+
+    def way_to_work_dir(self):
+        self.way = QFileDialog.getExistingDirectory(self, 'Выберите рабочую папку', '',)  + '/'  # Получение пути и имени рабочей папки
+        self.textEdit.clear()
+        self.textEdit.setText(self.way)                                                   # Вывод в окно
+
+    def button_click(self, button):
+        pressed_button = self.buttonBox.standardButton(button)  # Обработка нажптия на кнопку (любую ok или cancel)
+        if pressed_button == QtWidgets.QDialogButtonBox.Ok and self.checkBox.checkState() == 2:
+            memory_link_function('write', 'path_to_work_dir', self.way)  # Запись в system.db переменная path_to_work_dir
+            self.patch_to_work_dir.emit(self.way)                        # Отправка пути через сигнал
+            self.close()
+
+        elif pressed_button == QtWidgets.QDialogButtonBox.Ok and self.checkBox.checkState() == 0:
+            self.patch_to_work_dir.emit(self.way)  # Отправка пути через сигнал
+            self.close()
+        elif pressed_button == QtWidgets.QDialogButtonBox.Cancel:
+            self.close()
 
 
 # Запуск приложения
