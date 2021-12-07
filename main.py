@@ -42,24 +42,33 @@ class Main_window(QMainWindow):
         self.patch_to_PDF_program.triggered.connect(self.patch_to_PDF_function) # Само действие, запуск функции
         self.show_manual.triggered.connect(self.show_manuallist)                # Само действие: Показать мануал
         self.show_about_window.triggered.connect(self.about_show)               # Само действие: Показать о программе
+        self.work_dir.triggered.connect(self.path_to_work_dir)                  # Само действие: Указать путь к рабочей папке
+
     # Действие
     def _createActions(self):
         self.openAction = QAction('Открыть', self) # Возможно не задействованно
-        self.patch_to_PDF_program = QAction('Программа для открытия PDF',self)   # Создание действия при нажатии на строчку меню
-        self.show_manual = QAction('Показать инструкцию', self)                  # Создание действия при нажатии на строчку меню
-        self.show_about_window = QAction("О программе", self)
+        self.patch_to_PDF_program = QAction('Программа для открытия PDF', self)   # Создание действия при нажатии на строчку меню
+        self.show_manual = QAction('Показать инструкцию', self)                   # Создание действия при нажатии на строчку меню
+        self.show_about_window = QAction('О программе', self)
+        self.work_dir = QAction('Выбор рабочей папки', self)
+
 
     def _createMenuBar(self):
         menuBar = self.menuBar()                      # Создание строки меню
         fileMenu = QMenu("Настройки", self)           # Создание меню "Настройки"
         menuBar.addMenu(fileMenu)                     # Добавление в строку меню экземпляра fileMenu, "Настройки"
         fileMenu.addAction(self.patch_to_PDF_program) # Создание строчки меню
+        fileMenu.addAction(self.work_dir)
         helpMenu = menuBar.addMenu("Помощь")
         menuBar.addMenu(helpMenu)                     # Добавление в строку меню экземпляра helpMenu, "Помощь"
         helpMenu.addAction(self.show_manual)          # Создание строчки меню
         aboutMenu = QMenu("О программе", self)
         menuBar.addMenu(aboutMenu)
         aboutMenu.addAction(self.show_about_window)
+
+    #Функция вызова окна для получения пути к рабочей папке
+    def path_to_work_dir(self):
+        self.work_dir_path.show()
 
     # Функция вывода мануала
     def show_manuallist(self):
@@ -326,7 +335,6 @@ class Main_window(QMainWindow):
         else:
             self.pdf_default_program = False
             link = memory_link_function('read', 'patch_to_pdf')  # Получение ссылки из базы
-            print(link[0][0])
             self.pdf_program_name.setText(link[0][0])
             # Если ссылка не получена или ошибка
             if link is False or link[0][0] == '':
@@ -361,11 +369,12 @@ class Main_window(QMainWindow):
         super(Main_window, self).__init__()
         loadUi('simple_design.ui', self)
         # Дочерние окна
-        self.change_win = Change_form()    # Создание экземпляра класса Change_form
-        self.search_win = Search_form()    # Создание экземпляра класса Search_form
-        self.log_win = Log_form()           # Создание экземпляра класса Log_form
-        self.patch_pdf = PDF_program_form() # Создание экземпляра класса PDF_program_form
-        self.about_win = About_form()       # Созание экземпляра класса About_form
+        self.change_win = Change_form()        # Создание экземпляра класса Change_form
+        self.search_win = Search_form()        # Создание экземпляра класса Search_form
+        self.log_win = Log_form()              # Создание экземпляра класса Log_form
+        self.patch_pdf = PDF_program_form()    # Создание экземпляра класса PDF_program_form
+        self.about_win = About_form()          # Созание экземпляра класса About_form
+        self.work_dir_path = Way_to_work_dir() # Создпние экземпляра класса  Way_to_work_dir
 
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
@@ -616,6 +625,13 @@ class About_form(QWidget):
     def __init__(self):
         super(About_form, self).__init__()
         loadUi('about_form.ui', self)
+
+# Создания окна указания пути к рабочей папке
+class Way_to_work_dir(QWidget):
+    def __init__(self):
+        super(Way_to_work_dir, self).__init__()
+        loadUi('path_to_work_dir_form.ui', self)
+
 
 # Запуск приложения
 if __name__ == '__main__':
