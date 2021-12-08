@@ -203,7 +203,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>удалить.png</normaloff>удалить.png</iconset>
+      <normaloff>delete.png</normaloff>delete.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -239,7 +239,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>загрузка-обновлений.png</normaloff>загрузка-обновлений.png</iconset>
+      <normaloff>update.png</normaloff>update.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -281,7 +281,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>поиск.png</normaloff>поиск.png</iconset>
+      <normaloff>search.png</normaloff>search.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -428,7 +428,7 @@ background-color: rgb(255, 255, 255);</string>
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>показать_пароль.png</normaloff>показать_пароль.png</iconset>
+      <normaloff>show_password.png</normaloff>show_password.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -499,40 +499,6 @@ background-color: rgb(255, 231, 42);</string>
     </property>
     <property name="text">
      <string>Журнал</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="change_signal_label_3">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>620</y>
-      <width>341</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgba(0,0,0,0);</string>
-    </property>
-    <property name="text">
-     <string>Программа для просмотра чертежей:</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="pdf_program_name">
-    <property name="geometry">
-     <rect>
-      <x>350</x>
-      <y>620</y>
-      <width>470</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);</string>
     </property>
    </widget>
   </widget>

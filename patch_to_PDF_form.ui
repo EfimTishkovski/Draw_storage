@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>изогнутая_линия.png</normaloff>изогнутая_линия.png</iconset>
+    <normaloff>curwed_line.png</normaloff>curwed_line.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(192, 230, 255);</string>

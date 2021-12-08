@@ -342,10 +342,7 @@ class Main_window(QMainWindow):
     def pdf_link_check(self):
         link = memory_link_function('read', 'patch_to_pdf')  # Получение ссылки из базы при запуске программы
         self.patch_to_pdf = link[0][0]
-        if self.patch_to_pdf:
-            self.pdf_program_name.setText(link[0][0])
-        else:
-            self.pdf_program_name.setText('Не найдена!')
+
 
     # Функция предупреждения о выходе (переопределнние обработчика closeEvent)
     def closeEvent(self, event):

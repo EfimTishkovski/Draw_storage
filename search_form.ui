@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>фонарик.png</normaloff>фонарик.png</iconset>
+    <normaloff>flashlight.png</normaloff>flashlight.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(159, 185, 200);</string>

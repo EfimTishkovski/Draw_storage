@@ -32,7 +32,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>закладка.png</normaloff>закладка.png</iconset>
+    <normaloff>bookmark.png</normaloff>bookmark.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(234, 251, 255);</string>

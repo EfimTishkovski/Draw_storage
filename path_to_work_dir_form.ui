@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>закладка-лента.png</normaloff>закладка-лента.png</iconset>
+    <normaloff>book_mark_line.png</normaloff>book_mark_line.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(0, 170, 255);
