@@ -107,7 +107,6 @@ class Main_window(QMainWindow):
         try:
             basename = QFileDialog.getOpenFileName(self, 'Открыть файл', self.work_dir, '*.db')[0]  # Получение от пользователя имени базы для открытия
             if basename:
-                #print(basename.partition(self.work_dir))
                 relativ_path_to_base = basename.partition(self.work_dir)[2]
                 global gl_base
                 gl_base = basename      # Передача имени аткивной базы в глобальную переменную, можно использовать в любом классе
@@ -370,7 +369,6 @@ class Main_window(QMainWindow):
         link = memory_link_function('read', 'path_to_work_dir')[0][0]
         self.work_dir = link
 
-
     # Основная функция приложения
     def __init__(self):
         super(Main_window, self).__init__()
@@ -386,7 +384,6 @@ class Main_window(QMainWindow):
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
         self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
-        self.load()                           # Загрузка сохранённого пути к рабочей папке
 
         # Переменные
         self.change_flag = False          # Переменная состояния флага редактирования по умолчанию режим просмотра
@@ -401,6 +398,7 @@ class Main_window(QMainWindow):
         self._createActions()  # Подключение дествий в основной функции
         self._connectAction()  # Подключение действий при нажатии пунктов меню к основной функции
         self._createMenuBar()  # Подключение меню к строке меню
+        self.load()  # Загрузка сохранённого пути к рабочей папке
         self.pdf_link_check()  # Проверка наличия ссылки на прогу для открытия PDF файлов
         self.connect_base_button.clicked.connect(self.openfile)       # Обработчик кнопки "Подключить базу"
         self.table_list.activated[str].connect(self.info_table_show)  # Обработчик смены таблицы в выпадающем списке
@@ -547,6 +545,11 @@ class Log_form(QWidget):
         super(Log_form, self).__init__()
         loadUi('logform.ui', self)
         self.show_table_info()
+        self.reload_Button.clicked.connect(self.update_table)
+
+    # Функция обновления данных в таблице
+    def update_table(self):
+        self.show_table_info()
 
     # Функция отображения данных в окне журнала
     def show_table_info(self):
@@ -653,19 +656,19 @@ class Way_to_work_dir(QWidget):
         self.textEdit.setText(link)
 
     def way_to_work_dir(self):
-        self.way = QFileDialog.getExistingDirectory(self, 'Выберите рабочую папку', '',)  + '/'  # Получение пути и имени рабочей папки
+        way = QFileDialog.getExistingDirectory(self, 'Выберите рабочую папку', '',)  + '/'  # Получение пути и имени рабочей папки
         self.textEdit.clear()
-        self.textEdit.setText(self.way)                                                   # Вывод в окно
+        self.textEdit.setText(way)                                                   # Вывод в окно
 
     def button_click(self, button):
         pressed_button = self.buttonBox.standardButton(button)  # Обработка нажптия на кнопку (любую ok или cancel)
         if pressed_button == QtWidgets.QDialogButtonBox.Ok and self.checkBox.checkState() == 2:
-            memory_link_function('write', 'path_to_work_dir', self.way)  # Запись в system.db переменная path_to_work_dir
-            self.patch_to_work_dir.emit(self.way)                        # Отправка пути через сигнал
+            memory_link_function('write', 'path_to_work_dir', self.textEdit.toPlainText())  # Запись в system.db переменная path_to_work_dir
+            self.patch_to_work_dir.emit(self.textEdit.toPlainText())                        # Отправка пути через сигнал
             self.close()
 
         elif pressed_button == QtWidgets.QDialogButtonBox.Ok and self.checkBox.checkState() == 0:
-            self.patch_to_work_dir.emit(self.way)  # Отправка пути через сигнал
+            self.patch_to_work_dir.emit(self.textEdit.toPlainText())  # Отправка пути через сигнал
             self.close()
         elif pressed_button == QtWidgets.QDialogButtonBox.Cancel:
             self.close()
