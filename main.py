@@ -157,7 +157,7 @@ class Main_window(QMainWindow):
                 self.new_item_cell(item.row(), item.column(), item.text(), second_item.text())
         except:
             self.statusBar().showMessage('Ошибка открытия чертежа')
-            message_window('Неуказанна программа для открытия PDF файлов', 'Сообщение')
+            message_window('Неуказанна программа для открытия PDF файлов или файл не найден', 'Сообщение')
 
 
     # Функция получения новой ссылки на чертёж
@@ -517,6 +517,7 @@ class Search_form(QWidget):
         # Считывание имени базы и таблицы, через переменные нагляднее
         base = self.base_name_lineEdit.text()
         table = self.table_name_comboBox.currentText()
+        self.output_textEdit.clear()
         if base != '' and table != '':
             qwery_data = self.input_lineEdit.text()
             out_data = search_in_base(base, table, qwery_data)

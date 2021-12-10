@@ -120,12 +120,10 @@ def search_in_data(data_mass, parameter):
     out = []
     # Поиск по подстроке
     for line in data_mass:
-        st_line = ''
-        # Склеиваем кортеж в одну строку
         for word in line:
-            st_line += word
-        if parameter.lower() in st_line.lower():
-            out.append(line)
+            # Поиск по полному совпадению
+            if parameter.lower() == word.lower():
+                out.append(line)
     return out
 
 # Функция поиска по базе
