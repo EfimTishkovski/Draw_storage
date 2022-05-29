@@ -1,21 +1,14 @@
 from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, \
-    QFileDialog, QInputDialog, QMessageBox, QWidget, QCheckBox
+    QFileDialog, QInputDialog, QMessageBox, QWidget, QMenu
 from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import sys
 import subprocess
-import os
 from back import *
 
-"""
-написать систему аккаунтов
-написать систему ведения журнала
-написать меню, хелп, о программе
-добавить настройки при начаде работы типа указать программу для открытия PDF
-"""
 
 gl_base = ''  # Глобальная переменная для имени активной базы
 gl_table = '' # Глобальная переменная для имени активной таблицы
@@ -38,16 +31,44 @@ def error_window(messege, title='Ошибка!'):
     message_box.setWindowIcon(QIcon('ошибка.png'))
     message_box.exec_()
 
-
-
 class Main_window(QMainWindow):
 
     # Подключение действий в основной класс
     def _connectAction(self):
         self.openAction.triggered.connect(self.openfile)
+        self.patch_to_PDF_program.triggered.connect(self.patch_to_PDF_function) # Само действие, запуск функции
+        self.show_manual.triggered.connect(self.show_manuallist)                # Само действие: Показать мануал
+        self.show_about_window.triggered.connect(self.about_show)               # Само действие: Показать о программе
     # Действие
     def _createActions(self):
-        self.openAction = QAction('Открыть', self)
+        self.openAction = QAction('Открыть', self) # Возможно не задействованно
+        self.patch_to_PDF_program = QAction('Программа для открытия PDF',self)   # Создание действия при нажатии на строчку меню
+        self.show_manual = QAction('Показать инструкцию', self)                  # Создание действия при нажатии на строчку меню
+        self.show_about_window = QAction("О программе", self)
+
+    def _createMenuBar(self):
+        menuBar = self.menuBar()                      # Создание строки меню
+        fileMenu = QMenu("Настройки", self)           # Создание меню "Настройки"
+        menuBar.addMenu(fileMenu)                     # Добавление в строку меню экземпляра fileMenu, "Настройки"
+        fileMenu.addAction(self.patch_to_PDF_program) # Создание строчки меню
+        helpMenu = menuBar.addMenu("Помощь")
+        menuBar.addMenu(helpMenu)                     # Добавление в строку меню экземпляра helpMenu, "Помощь"
+        helpMenu.addAction(self.show_manual)          # Создание строчки меню
+        aboutMenu = QMenu("О программе", self)
+        menuBar.addMenu(aboutMenu)
+        aboutMenu.addAction(self.show_about_window)
+
+    # Функция вывода мануала
+    def show_manuallist(self):
+        try:
+            path = 'Manual.pdf'
+            path_to_acrobat = self.patch_to_pdf  # Путь к проге заданной пользователем
+            # Открытие документа, все страницы
+            process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False, stdout=subprocess.PIPE)
+            process.wait()
+        except:
+            message_window('Ошибка открытия мануала.\n Проверьте путь к программе для открытия PDF файлов\n '
+                           'Настройки -> Программа для открытия PDF', 'Сообщение')
 
     # Функция отображения выбранной таблицы в основном табличном виджете
     # Выбранная таблица не должна быть пустой, нужна хотя бы одна запись! (Может потом сделаю отлов этого бага)
@@ -55,7 +76,7 @@ class Main_window(QMainWindow):
         try:
             enable_table = self.table_list.currentText()                    # Получение имени выбранной таблицы
             global gl_table
-            gl_table = enable_table                                         # Передача имени активной базы в Глобальную переменную
+            gl_table = enable_table                                         # Передача имени активной таблицы в Глобальную переменную
             header_columns = names_columns(gl_base, gl_table)               # Получение заголовков
             self.Main_Table.setColumnCount(len(header_columns))             # Устанавливаем количество столбцов
             self.Main_Table.setHorizontalHeaderLabels(header_columns)       # Выводим имена заголовков в таблицу
@@ -82,10 +103,9 @@ class Main_window(QMainWindow):
                 base_tables = names_tables(gl_base)                # Получение имён таблиц из базы
                 for table in base_tables[0]:                       # Формирование массива с именами таблиц
                     out_list_tablename.append(table[0])
-
+                self.table_list.clear()                            # Очистка комбобокса перед вставкой имён таблиц
                 self.table_list.addItems(out_list_tablename)       # Добавление имён таблиц в выпадающий список
                 self.info_table_show()                             # Отбражение содержимого первой таблицы
-              
                 self.statusBar().showMessage(f'Подключена база: {basename}.')
                 self.line_base_name.setText(basename)         # Вывод пути и имени базы в окошке "Используемая база"
         except:
@@ -98,20 +118,17 @@ class Main_window(QMainWindow):
             if item.column() == 2 and self.change_flag is False:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии
                 path = item.text()
-                # Путь к программе открывабщей pdf-файлы
-                path_to_acrobat = os.path.abspath('C:\Program Files (x86)\Foxit Software\Foxit PhantomPDF\FoxitPhantomPDF.exe')
-
+                path_to_acrobat = self.patch_to_pdf       # Путь к проге заданной пользователем
                 # Открытие документа, все страницы
                 process = subprocess.Popen([path_to_acrobat, '/A', 'page = ALL', path], shell=False,stdout=subprocess.PIPE)
                 process.wait()
-
             elif item.column() <= 1 and self.change_flag is False:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)    # Запрет на редактирование при нажатии других ячеек
 
             # Запрет на изменение номера чертежа и номера записи в режиме редактирования
             elif item.column() == 0 and self.change_flag is True:
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
-                # дописать функцию, с окошком сообщения, что редактирование не возможно
+                message_window('Редактирование не возможно', 'Сообщение')
 
             elif item.column() == 2 and self.change_flag is True:
                 # Замена ссылки на чертёж
@@ -125,45 +142,41 @@ class Main_window(QMainWindow):
                 self.new_item_cell(item.row(), item.column(), item.text(), second_item.text())
         except:
             self.statusBar().showMessage('Ошибка открытия чертежа')
+            message_window('Неуказанна программа для открытия PDF файлов', 'Сообщение')
+
 
     # Функция получения новой ссылки на чертёж
     def new_link_draw(self, item):
         try:
             link = QFileDialog.getOpenFileName(self, 'Новый чертёж', '', '*.pdf')[0]  # Получение новой ссылки
             old_link = item.text()                                                    # Старая ссылка
-            name_column = self.Main_Table.horizontalHeaderItem(item.column()) # Получение имени столбца
-            print(name_column.text)
-            second_item = self.Main_Table.item(item.row(), 1)  # Получение номера чертежа (если ссылки вдруг динаковые)
+            name_column = self.Main_Table.horizontalHeaderItem(item.column())         # Получение имени столбца
+            second_item = self.Main_Table.item(item.row(), 0)  # Получение номера чертежа (если ссылки вдруг одинаковые)
             self.Main_Table.setItem(item.row(), item.column(),
-                                QtWidgets.QTableWidgetItem(str(link)))  # Установка новой ссылки в выбранную ячейку
+                                QtWidgets.QTableWidgetItem(str(link)))                # Установка новой ссылки в выбранную ячейку
             # Замена ссылки, работает таже функция, что и для замены названия чертежа
             reload_data(gl_base, gl_table, old_link, link, second_item.text(), name_column.text())
+            log_journal_writter(self.activ_user, second_item.text(), 'Замена чертежа') # Запись в журнал
             return True
-        except sqlite3.Error as error:
-            self.statusBar().showMessage('Ошибка замены чертежа', error)
+        except:
+            self.statusBar().showMessage('Ошибка замены чертежа')
 
-    # Функция замены имени чертежа (детали) в базе
+    # Функция замены названия чертежа (детали) в базе
     def new_item_cell(self, row, column, old_data, second_old_data):
+        # second_old_data номер чертежа у которого меняется название
         try:
             text, ok = QInputDialog.getText(self, 'Замена названия чертежа', 'Введите новое имя:')
 
-            if ok:
+            if ok and text != '':
                 self.Main_Table.setItem(row, column, QtWidgets.QTableWidgetItem(text))   # Установка нового значения в выбранную ячейку
-                #base = self.line_base_name.text()                                        # Текущая база данных
-                #activ_table = self.table_list.currentText()                              # Активная таблица
-                name_column = self.Main_Table.horizontalHeaderItem(row + 1)              # Получение имени столбца
-                reload_data(gl_base, gl_table, old_data, text, second_old_data, name_column.text())          # Замена значения а БД
+                name_column = self.Main_Table.horizontalHeaderItem(column)              # Получение имени столбца
+                reload_data(gl_base, gl_table, old_data, text, second_old_data, name_column.text())  # Замена значения а БД
+                log_journal_writter(self.activ_user, second_old_data, 'Изменение названия')          # Запись в журнал изменений
                 self.statusBar().showMessage('Название детали заменено')
+            elif ok and text == '':
+                message_window('Название не должно быть пустым', 'Сообщение')
         except:
             self.statusBar().showMessage('Ошибка замены названия детали')
-
-    # Функция смены режимов редактирования и просмотра
-    def change_button_pessed(self):
-        self.change_flag = not self.change_flag   # Инверсия логического значения флага при нажатии
-        if self.change_flag:
-            self.change_signal_label.setText('Вход выполнен: режим редактирования ативен')
-        else:
-            self.change_signal_label.setText('Вход не выпонен: режим просмотра')
 
     # Функция принятия номера выделонной строки (решение странное)
     def select_row_number(self, row):
@@ -172,7 +185,7 @@ class Main_window(QMainWindow):
     # Функция удаления строки (удаление детали из базы)
     def delete_row(self):
         try:
-            if self.change_flag and self.selected_row > 0:
+            if self.change_flag and self.selected_row >= 0:
                 # Вызов окошка одтверждения действия
                 reply = QMessageBox.question(self, 'Подтверждение', 'Удалить строку?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 # Если ответ 'YES' то функция продолжает работу
@@ -182,6 +195,7 @@ class Main_window(QMainWindow):
                     self.Main_Table.removeRow(row)
                     run = delete_row(gl_base, gl_table, number_draw)  # Само удаление строки, run получает True или False
                     if run:
+                        log_journal_writter(self.activ_user, number_draw, 'Чертёж удалён')  # Запись в журнал об удалении
                         self.statusBar().showMessage('Строка удалена')
                     else:
                         self.statusBar().showMessage('Ошибка удаления строки: не отработала функция')
@@ -215,6 +229,7 @@ class Main_window(QMainWindow):
         try:
             insert_draw(gl_base, gl_table,number, name, link)
             self.info_table_show()   # Обновление таблицы в главном окне (по факту отрисовка её заново)
+            log_journal_writter(self.activ_user, number, 'Добавлена новая деталь')  # Запись в журнал изменений
             self.statusBar().showMessage('Данные успешно добавлены')
         except:
             self.statusBar().showMessage('Ошибка добавления данных')
@@ -225,11 +240,11 @@ class Main_window(QMainWindow):
 
     # Функция входа в аккаунт
     def enter(self):
-        fild_flag = False # Флаг для обработки условия не пустых полей
-        # Можно и без него, но нехотелось городить множественные вложенные условия
         # Проверка на пустые поля ввода
         user_name = self.username_lineEdit.text()
         password = self.password_lineEdit.text()
+        # fild_flag Флаг для обработки условия не пустых полей
+        # Можно и без него, но нехотелось городить множественные вложенные условия
         if user_name !='' and password != '':
             fild_flag = True
         elif user_name == '' or password == '':
@@ -247,6 +262,7 @@ class Main_window(QMainWindow):
                 self.change_signal_label_2.setText('Пользователь: ' + user_name)
                 self.delete_button.setEnabled(True)  # Активация кнопки "удалить строку"
                 self.append_button.setEnabled(True)  # Активация кнопки "добавить строку"
+                self.activ_user = user_name          # Присвоение имени пользователя
             elif enter_flag is False:
                 message_window('Неверное имя пользователя или пароль', ' Вход не выполнен')
             elif enter_flag is None:
@@ -258,19 +274,23 @@ class Main_window(QMainWindow):
 
     # Функция выхода из аккаунта
     def exit_account(self):
-        reply = QMessageBox.question(self, 'Подтверждение', 'Выйти из аккаунта?', QMessageBox.Yes | QMessageBox.No,
+        # Условие проверки наличия активного пользователя(или выполнен вход)
+        if self.activ_user != '':
+            reply = QMessageBox.question(self, 'Подтверждение', 'Выйти из аккаунта?', QMessageBox.Yes | QMessageBox.No,
                                      QMessageBox.No)
-        # Если ответ 'YES' то выполняется выход
-        # Если ответ 'NO' то ничего не происходит пользователь дальше активен
-        if reply == QMessageBox.Yes:
-            self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
-            self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
-            self.change_flag = False
-            self.password_lineEdit.clear()  # Очистка полей посде выхода
-            self.username_lineEdit.clear()
-            self.change_signal_label.setText('Вход не выполнен: режим просмотра')
-            self.statusBar().showMessage('Выход из аккауна выполнен')
-
+            # Если ответ 'YES' то выполняется выход
+            # Если ответ 'NO' то ничего не происходит пользователь дальше активен
+            if reply == QMessageBox.Yes:
+                self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
+                self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
+                self.change_flag = False
+                self.password_lineEdit.clear()        # Очистка полей посде выхода
+                self.username_lineEdit.clear()
+                self.change_signal_label.setText('Вход не выполнен: режим просмотра')
+                self.statusBar().showMessage('Выход из аккауна выполнен')
+                self.activ_user = ''                  # Сброс имени пользователя
+        else:
+            message_window('Вход не был выполнен\n Нет активного пользоватнля', 'Сообщение')
 
     # Функция работы Кнопки показать пароль
     def show_password(self):
@@ -280,7 +300,45 @@ class Main_window(QMainWindow):
         elif mode == 2:
             self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Normal)
 
+    # Функция работы кнопки "журнал"
+    def show_log_journal(self):
+        self.log_win.show()
 
+    # Функция запуска окна указания программы для PDF
+    def patch_to_PDF_function(self):
+        self.patch_pdf.show()
+
+    # Функция передачи пути к PDF программе
+    def link_PDF_program(self, link, check_state):
+        self.patch_to_pdf = link
+        if check_state == 2:
+            # Если галка стоит то сохраняем ссылку в базу
+            memory_link_function('write', link)
+            self.pdf_program_name.setText(link)
+        elif check_state == 0:
+            self.pdf_program_name.setText(link)
+
+    # Функция проверки наличия ссылки на программу для открытия PDF
+    def pdf_link_check(self):
+        link = memory_link_function('read')  # Получение ссылки из базы при запуске программы
+        self.patch_to_pdf = link[0][0]
+        if self.patch_to_pdf:
+            self.pdf_program_name.setText(link[0][0])
+        else:
+            self.pdf_program_name.setText('Не найдена!')
+
+    # Функция предупреждения о выходе (переопределнние обработчика closeEvent)
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Сообщение', 'Хотите выйти?', QMessageBox.Yes |
+                                      QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+    # Функция вызова окна "О программе"
+    def about_show(self):
+        self.about_win.show()
 
     # Основная функция приложения
     def __init__(self):
@@ -288,35 +346,30 @@ class Main_window(QMainWindow):
         loadUi('simple_design.ui', self)
         # Дочерние окна
         self.change_win = Change_form()    # Создание экземпляра класса Change_form
-        self.change_win.setWindowIcon(QIcon('галочка.png'))  # Установка значка для окна добавления чертежа
-
         self.search_win = Search_form()    # Создание экземпляра класса Search_form
-        self.search_win.setWindowIcon(QIcon('фонарик.png'))  # Установка значка для окна поиска
+        self.log_win = Log_form()           # Создание экземпляра класса Log_form
+        self.patch_pdf = PDF_program_form() # Создание экземпляра класса PDF_program_form
+        self.about_win = About_form()       # Созание экземпляра класса About_form
 
         # Инциализация (состояние некоторых кнопок на момент запуска приложения)
         self.delete_button.setEnabled(False)  # Кнопка "удалить строку" по умолчанию не активна"
         self.append_button.setEnabled(False)  # Кнопка "добавить строку" по умолчанию не активна"
 
-        # Програмная вставка иконок в кнопки (эксперимент)
-        self.delete_button.setIcon(QIcon('удалить-64.png'))
-        self.delete_button.setIconSize(QSize(35, 35))
-        self.append_button.setIcon(QIcon('загрузка-обновлений.png'))
-        self.append_button.setIconSize(QSize(35, 35))
-        self.search_button.setIcon(QIcon('поиск.png'))
-        self.search_button.setIconSize(QSize(35, 35))
-
         # Переменные
-        self.change_flag = False             # Переменная состояния флага редактирования по умолчанию режим просмотра
-        self.table_names = []                # Массив для имён таблиц
-        self.selected_row = -1               # Переменная номер выделенной строки
+        self.change_flag = False          # Переменная состояния флага редактирования по умолчанию режим просмотра
+        self.table_names = []             # Массив для имён таблиц
+        self.selected_row = -1            # Переменная номер выделенной строки
+        self.activ_user = ''              # Имя активного пользователя
+        self.patch_to_pdf = ''            # Путь к программе для открытия PDF файлов
 
         # Обработка событий и сигналов
         self._createActions()  # Подключение дествий в основной функции
         self._connectAction()  # Подключение действий при нажатии пунктов меню к основной функции
+        self._createMenuBar()  # Подключение меню к строке меню
+        self.pdf_link_check()  # Проверка наличия ссылки на прогу для открытия PDF файлов
         self.connect_base_button.clicked.connect(self.openfile)       # Обработчик кнопки "Подключить базу"
         self.table_list.activated[str].connect(self.info_table_show)  # Обработчик смены таблицы в выпадающем списке
         self.Main_Table.itemClicked.connect(self.show_drawing)        # Обработчик клика на ячейку, показывает чертёж
-        #self.change_button.clicked.connect(self.change_button_pessed) # Обработчик кнопки "Внести изменения"
         self.Main_Table.verticalHeader().sectionClicked.connect(self.select_row_number)  # Обработчик события нажатия на заголовок строки, возвращает номер выделенной строки
         self.delete_button.clicked.connect(self.delete_row)            # Обработчик кнопки "Удалить строку"
         self.append_button.clicked.connect(self.insert_data)           # Обработчик кнопки "Добавить строку"
@@ -326,6 +379,8 @@ class Main_window(QMainWindow):
         self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)  # По умолчанию ключ скрыт
         self.show_password_button.clicked.connect(self.show_password)     # Обработчик кнопки показать пароль
         self.exit_account_button.clicked.connect(self.exit_account)       # Обработчик кнопки "Выход из учётной записи"
+        self.show_log_button.clicked.connect(self.show_log_journal)       # обработчик кнопки "журнал"
+        self.patch_pdf.patch[str, int].connect(self.link_PDF_program)     # Обработчик оплучения ссылки(пути) к PDF проге
 
 # Создание окна для внесения новых записей в БД
 class Change_form(QWidget):
@@ -435,6 +490,7 @@ class Search_form(QWidget):
                 message_window('Ничего не найдено')
             else:
                 # Вывод результатов поиска в окно
+                self.output_textEdit.clear()
                 for line in out_data:
                     out = ''
                     for element in line:
@@ -445,10 +501,63 @@ class Search_form(QWidget):
             # Окошко предупреждения о не выбранной таблице и/или базе
             message_window('Невыбрана база или таблица')
 
+# Создание окна журнала
+class Log_form(QWidget):
+    def __init__(self):
+        super(Log_form, self).__init__()
+        loadUi('logform.ui', self)
+        self.show_table_info()
+
+    # Функция отображения данных в окне журнала
+    def show_table_info(self):
+        names_columns_log = names_columns('log.db', 'log_journal')   # Получение имён столбцов
+        data = load_data('log.db', 'log_journal')                    # Получение данных из базы
+        self.log_tableWidget.setColumnCount(len(names_columns_log))        # Устанавливаем количество столбцов
+        self.log_tableWidget.setHorizontalHeaderLabels(names_columns_log)  # Выводим имена заголовков в таблицу
+        self.log_tableWidget.setRowCount(len(data))                        # Установка количества строк
+        # Передача данных в таблицу
+        for row in range(len(data)):
+            for column in range(len(data[row])):
+                self.log_tableWidget.setItem(row, column, QtWidgets.QTableWidgetItem(str(data[row][column])))
+        self.log_tableWidget.resizeColumnsToContents()  # Подгонка размеров колонок по содержимому
+
+# Создание окна для указания программы открытия PDF файлов
+class PDF_program_form(QWidget):
+    patch = pyqtSignal(str, int)  # Сигнал для передачи пути
+
+    def __init__(self):
+        super(PDF_program_form, self).__init__()
+        loadUi('patch_to_PDF_form.ui', self)
+        self.overview_pushButton.clicked.connect(self.way_to_program)   # Обработчик нажатия на кнопку "Обзор"
+        self.buttonBox.clicked.connect(self.button_click)               # Обработчи нажатия Ok/Cancel
+
+    def way_to_program(self):
+        patch = QFileDialog.getOpenFileName(self, 'Указать путь', '', '*.exe')[0]  # Получение пути
+        self.patch_lineEdit.setText(patch)
+
+    def button_click(self, button):
+        pressed_button = self.buttonBox.standardButton(button)  # Обработка нажптия на кнопку (любую ok или cancel)
+        if pressed_button == QtWidgets.QDialogButtonBox.Ok:
+            # Проверка на не пустой ввод
+            if self.patch_lineEdit.text() != '':
+                # Отправка сигнала с данными в основное окно
+                self.patch.emit(self.patch_lineEdit.text(), self.memory_link_checkBox.checkState()) # Отправка значения через сигнал
+                self.patch_lineEdit.clear() # Очистка окна
+                self.close()
+            else:
+                message_window('Пустая ссылка', 'Сообщение')
+        elif pressed_button == QtWidgets.QDialogButtonBox.Cancel:
+            self.close()
+
+# Создание окна "О программе"
+class About_form(QWidget):
+    def __init__(self):
+        super(About_form, self).__init__()
+        loadUi('about_form.ui', self)
+
 # Запуск приложения
 if __name__ == '__main__':
     app = QApplication(sys.argv)                   # Новый объет приложения экземпляр класса Qtapplication, sys.arg - список аргументов ком. строки
     window = Main_window()                         # Создание экземпляра класса Main_window
-    window.setWindowIcon(QIcon('virtualbox.png'))  # Установка значка приложения
     window.show()                                  # Показать окно на экране
     sys.exit(app.exec_())                          # Запуск основного цикла приложения sys.exit() гарантирует чистый выход

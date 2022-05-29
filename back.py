@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 # Функция получения имён и количества таблиц в базе
 def names_tables(data_base):
@@ -11,8 +12,8 @@ def names_tables(data_base):
         cursor.close()                           # Закрытие курсора
         connection.close()                       # Закрытие соединения с БД
         return names_tables, len(names_tables)   # Функция возвращает котртеж([имена таблиц], количество сторбцов)
-    except sqlite3.Error as error:
-        print('Ошибка при подключении к базе', data_base, error)
+    except:
+        return False
 
 # Функция получения имён столбцов в таблице базы
 def names_columns(data_base, table):
@@ -20,28 +21,28 @@ def names_columns(data_base, table):
         connection = sqlite3.connect(data_base)
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
-        cursor.execute('select * from {}'.format(table))
+        cursor.execute(f"select * from '{table}'")
         line = cursor.fetchone()
         names_column = line.keys()
         cursor.close()
         connection.close()
         return names_column
-    except sqlite3.Error as error:
-        print('Ошибка при подключении к базе', data_base, error)
+    except:
+        return False
 
 # Функция получения информации из базы
 def load_data(data_base, table):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        load_data_qwery = 'select * from {}'.format(table)   # Запрос на данные из тблицы
+        load_data_qwery = f"select * from '{table}'"   # Запрос на данные из тблицы
         cursor.execute(load_data_qwery)
         data = cursor.fetchall()
         cursor.close()
         connection.close()
         return data
-    except sqlite3.Error as error:
-        print('Ошибка при загрузке данных из таблицы', table, error)
+    except:
+        return False
 
 # Функция замены данных в БД (пока в одной ячейке)
 def reload_data(data_base, table, old_data, new_data, second_old_data, column):
@@ -49,15 +50,18 @@ def reload_data(data_base, table, old_data, new_data, second_old_data, column):
     try:
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
-        # Сам SQL запрос на изменение, также реализованно отслеживание номера чертежа если названия одинаковые
-        reload_data_qwery = f"UPDATE {table} SET [{column}] = '{new_data}' WHERE [{column}] = '{old_data}' AND [Номер] = '{second_old_data}'"
+        if column == 'Расположение':
+            # Запрос на из менение ссылки (если ссылка пустая NULL или None запена не работала)
+            reload_data_qwery = f"UPDATE '{table}' SET [{column}] = '{new_data}' WHERE [Номер] = '{second_old_data}'"
+        else:
+            # Сам SQL запрос на изменение, также реализованно отслеживание номера чертежа если названия одинаковые
+            reload_data_qwery = f"UPDATE '{table}' SET [{column}] = '{new_data}' WHERE [{column}] = '{old_data}' AND [Номер] = '{second_old_data}'"
         cursor.execute(reload_data_qwery)    # Выполонение запроса
         cursor.close()
         connection.commit()                  # Сохранение изменений
         connection.close()
         return True
-    except sqlite3.Error as error:
-        print('Ошибка при записи данных', table, error) # Возможно сообщение лишнее, показать в приложении не получится
+    except:
         return False
 
 # Функция удаления строки (записи) в БД
@@ -66,14 +70,13 @@ def delete_row(data_base, table, number_draw):
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
         # SQL запрос на удаление строки
-        delete_row_qwery = f"DELETE FROM {table} WHERE [Номер] = '{number_draw}'"
+        delete_row_qwery = f"DELETE FROM '{table}' WHERE [Номер] = '{number_draw}'"
         cursor.execute(delete_row_qwery)
         cursor.close()
         connection.commit()
         connection.close()
         return True
-    except sqlite3.Error as error:
-        print('Ошибка удаления строки', table, error)
+    except:
         return False
 
 # Функция проверки номера чертежа на совпадение (занят в базе или свободен)
@@ -82,7 +85,7 @@ def number_draw_test(data_base, table, number):
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
         #SQL запрос на получение номеров чертежей из активной таблицы и поиск совпадений
-        qwery_draw_numbers = f"SELECT [Номер] from {table} WHERE [Номер] = '{number}'"
+        qwery_draw_numbers = f"SELECT [Номер] from '{table}' WHERE [Номер] = '{number}'"
         cursor.execute(qwery_draw_numbers)
         data = cursor.fetchall()
         cursor.close()
@@ -94,9 +97,8 @@ def number_draw_test(data_base, table, number):
         else:
             data.clear()  # На всякий случай очистка массива данных, их может быть очень много
             return True
-
-    except sqlite3.Error as error:
-        print('Ошибка поиска', error)
+    except:
+        return None
 
 # Функция добавления новой записи (нового чертежа) в БД
 def insert_draw(data_base, table, number, name, link):
@@ -104,13 +106,13 @@ def insert_draw(data_base, table, number, name, link):
         connection = sqlite3.connect(data_base)
         cursor = connection.cursor()
         # SQL запрос на вставку новых данных в таблицу
-        qwery_draw_insert = f"INSERT INTO {table} ([Номер],[Название],[Расположение]) VALUES ('{number}','{name}','{link}');"
+        qwery_draw_insert = f"INSERT INTO '{table}' ([Номер],[Название],[Расположение]) VALUES ('{number}','{name}','{link}');"
         cursor.execute(qwery_draw_insert)
         cursor.close()
         connection.commit()
         connection.close()
-    except sqlite3.Error as error:
-        print('Ошибка добавления записи',error)
+    except:
+        return False
 
 # Функция поиска по базе
 def search_in_base(data_base, table, data):
@@ -124,15 +126,15 @@ def search_in_base(data_base, table, data):
             column = 'Расположение'
         else:
             column = 'Номер'
-        qwery_search = f"SELECT * FROM {table} WHERE [{column}] = '{data}'"
+        qwery_search = f"SELECT * FROM '{table}' WHERE [{column}] = '{data}'"
         cursor.execute(qwery_search)
         search_data = cursor.fetchall()
         cursor.close()
         connection.commit()
         connection.close()
         return search_data
-    except sqlite3.Error as error:
-        print('Ошибка поиска', error)
+    except:
+        return False
 
 # Функция проверки имени пользователя и пароля
 def check_enter(name, password):
@@ -142,9 +144,52 @@ def check_enter(name, password):
         qwery = f"SELECT * FROM users WHERE [Имя] = '{name}' AND [Пароль] = '{password}'"
         cursor.execute(qwery)
         result = cursor.fetchall()
+        cursor.close()
+        connection.close()
         if len(result) != 0:
             return True
         else:
             return False
     except:
         return None
+
+# Функция внесения записей в журнал изменений
+# На входе: дата, имя пользователя, объект над которым совершаются действия, само действие
+def log_journal_writter(user_name, target, action):
+    try:
+        connection = sqlite3.connect('log.db')
+        cursor = connection.cursor()
+        date = datetime.now()
+        # Костыль времени 16:2 -> 16:02
+        if date.minute < 10:
+            minute = '0' + str(date.minute)
+        else:
+            minute = date.minute
+        date_write = "{}.{}.{} {}.{}".format(date.day, date.month, date.year, date.hour, minute) # Формирование даты
+        log_qwery = f"INSERT INTO log_journal ([Дата],[Пользователь],[Объект],[Действие]) VALUES ('{date_write}','{user_name}','{target}','{action}');"
+        cursor.execute(log_qwery)
+        cursor.close()
+        connection.commit()
+        connection.close()
+        return True
+    except:
+        return False
+
+# Функция записи и чтения пути к программе для открытия PDF
+def memory_link_function(state, link=''):
+    try:
+        connection = sqlite3.connect('system.db')
+        cursor = connection.cursor()
+        # Выбор действия чтения или запись
+        if state == 'write':
+            qwery = f"UPDATE system SET value = '{link}' WHERE varibal = 'patch_to_pdf'"
+        elif state == 'read':
+            qwery = f"SELECT value FROM system WHERE varibal = 'patch_to_pdf'"
+        cursor.execute(qwery)
+        link_to_pdf = cursor.fetchall()
+        cursor.close()
+        connection.commit()
+        connection.close()
+        return link_to_pdf
+    except:
+        return False

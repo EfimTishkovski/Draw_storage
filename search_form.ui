@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Поиск</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>фонарик.png</normaloff>фонарик.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(159, 185, 200);</string>
   </property>
@@ -133,6 +137,9 @@ background-color: rgb(85, 170, 0);</string>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(255, 255, 255);
 font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
+   </property>
+   <property name="lineWrapMode">
+    <enum>QTextEdit::NoWrap</enum>
    </property>
   </widget>
  </widget>
