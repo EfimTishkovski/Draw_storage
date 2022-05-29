@@ -110,6 +110,10 @@
   <property name="windowTitle">
    <string>Новый чертёж</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>arrow.png</normaloff>arrow.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(185, 255, 215);</string>
   </property>
